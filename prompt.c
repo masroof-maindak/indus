@@ -1,24 +1,29 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-static char input[2048];
+#include <readline/readline.h>
+#include <readline/history.h>
 
 int main(int argc, char** argv) {
 
 	puts("Indus version 0.0.0.0.1");
 	puts("Press Ctrl+c to exit\n");
 
-	// Using 'true' here doesn't work because C doesn't have bools
 	while (1) {
+		char* input = readline("lisp> ");
 
-		// file put string
-		// Doesn't append a newline char 
-		fputs("indus> ", stdout);
+		// add to history
+		add_history(input);
 
-		// file get string
-		// Stores 2048 bytes in input buffer
-		fgets(input, 2048, stdin);
+		// Print back
+		printf("No you're a %s\n", input);
+		// have to manually print a newline, because readline strips it out
 
-		printf("No you're a %s", input);
+		// Need `libedit-dev` on linux to compile
+		// histedit.h on arch
+
+		// free buffer
+		free(input);
 	}
 
 	return 0;
