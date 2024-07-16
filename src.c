@@ -17,12 +17,15 @@
 
 #define INPUT_BUFFER 1024
 
-// TODO: read these from config
+// TODO: read these from XDG_CONFIG_DIR/indus/config(?)
+// TODO: mkdir -p if it doesn't exist
+// TODO: live reload(?) - watch for changes to file in another thread
 #define ACCENT 		COL_YELLOW
 #define PROMPT_CHAR ";"
 #define SHORTEN_HOME 1
 #define SHORTEN_PWD 1
 
+// NOTE: Should arg be a char***? For catering to pipes, `&&`, and `||`
 void parse() {}
 
 void run() {}
@@ -59,13 +62,13 @@ void loop() {
 		input = readline("");
 		add_history(input);
 
-		arg = parse(input);
-		status = run(arg);
+		/*arg = parse(input);*/
+		/*status = run(arg);*/
 
 		printf("No you're a %s\n", input);
 
-		free(input);
-		free(args);
+		/*free(input);*/
+		/*free(arg);*/
 	}
 }
 
