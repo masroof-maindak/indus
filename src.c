@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <linux/limits.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
+
+#include "prompt/prompt.h"
 
 /* COLOURS */
 #define COL_RED     "\x1b[31m"
@@ -21,44 +24,44 @@
 // TODO: mkdir -p if it doesn't exist
 // TODO: live reload(?) - watch for changes to file in another thread
 #define ACCENT 		COL_YELLOW
-#define PROMPT_CHAR ";"
-#define SHORTEN_HOME 1
-#define SHORTEN_PWD 1
+#define PROMPT_CHAR "*"
+
+char pathSplit[] = "/";
 
 // NOTE: Should arg be a char***? For catering to pipes, `&&`, and `||`
 void parse() {}
 
 void run() {}
 
+char* copy_string(char* str) {
+	char* copy = malloc(strlen(str) + 1);
+	strcpy(copy, str);
+	return copy;
+}
+
 void loop() {
 	char* username;
 	username = getlogin();
+	if (username == NULL) {
+		perror("getlogin() error");
+		return;
+	}
 
-	char pwd[PATH_MAX];
+	char *pwd = malloc(PATH_MAX);
 
 	char* input;
-	char** arg;
-	int status;
+	/* char** arg; */
+	/* int status; */
 
 	printf("Greetings, %s. Welcome to Indus.\n", username);
 	printf("Type " ACCENT "help" COL_RESET " to get started.\n");
 	puts("Press Ctrl+c to exit.\n");
 
 	while (1) {
-		if (getcwd(pwd, sizeof(pwd)) == NULL) {
-			perror("getcwd() error");
-			return;
-		}
 
-		if (SHORTEN_HOME) {
-			// TODO: shorten `/home/maindak` to `~`
-		}
+		char* prompt = generate_prompt(pwd, username);
 
-		if (SHORTEN_PWD) {
-			// TODO: shorten `~/Documents/xyz` to `~/D/xyz`
-		}
-
-		printf("%s" ACCENT PROMPT_CHAR COL_RESET " ", pwd);
+		printf("%s" ACCENT PROMPT_CHAR COL_RESET " ", prompt);
 		input = readline("");
 		add_history(input);
 
@@ -72,16 +75,27 @@ void loop() {
 	}
 }
 
+void parse_flags(int argc, char** argv) {
+	/* TODO */
+	char* first = copy_string(argv[1]);
+	printf("%s\n", first);
+}
+void parse_config() {/* TODO */}
+int cleanup() {
+	/* TODO: sigint handler? */
+	/* TODO: dump history to file */
+	return 0;
+}
+
 int main(int argc, char** argv) {
-	system("clear");
 
-	// TODO: Parse command line options?
+	if (argc > 1) {
+		parse_flags(argc, argv);
+	}
 
-	// TODO: Parse config
+	parse_config();
 
 	loop();
 
-	// TODO: Perform shutdown/cleanup
-
-	return 0;
+	return cleanup();
 }
