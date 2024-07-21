@@ -19,6 +19,7 @@
 #define COL_RESET   "\x1b[0m"
 
 #define INPUT_BUFFER 1024
+#define USERNAME_BUFFER 32
 
 // TODO: read these from XDG_CONFIG_DIR/indus/config(?)
 // TODO: mkdir -p if it doesn't exist
@@ -40,8 +41,9 @@ char* copy_string(char* str) {
 }
 
 void loop() {
-	char* username;
+	char* username = malloc(USERNAME_BUFFER + 1);
 	username = getlogin();
+
 	if (username == NULL) {
 		perror("getlogin() error");
 		return;
@@ -70,9 +72,16 @@ void loop() {
 
 		printf("No you're a %s\n", input);
 
-		/*free(input);*/
+		free(input);
+		free(prompt);
 		/*free(arg);*/
+
+		input = NULL;
+		prompt = NULL;
 	}
+
+	free(pwd);
+	free(username);
 }
 
 void parse_flags(int argc, char** argv) {
