@@ -21,9 +21,6 @@
 #define INPUT_BUFFER 1024
 #define USERNAME_BUFFER 32
 
-// TODO: read these from XDG_CONFIG_DIR/indus/config(?)
-// TODO: mkdir -p if it doesn't exist
-// TODO: live reload(?) - watch for changes to file in another thread
 #define ACCENT 		COL_YELLOW
 #define PROMPT_CHAR "*"
 
@@ -61,11 +58,11 @@ void loop() {
 
 	while (1) {
 
-		char* prompt = generate_prompt(pwd, username);
+		char *prompt = generate_prompt(pwd, username);
 
 		printf("%s" ACCENT PROMPT_CHAR COL_RESET " ", prompt);
-		input = readline("");
-		add_history(input);
+		input = readline(NULL);
+		/* TODO: add_history(input); */
 
 		/*arg = parse(input);*/
 		/*status = run(arg);*/
@@ -89,11 +86,19 @@ void parse_flags(int argc, char** argv) {
 	char* first = copy_string(argv[1]);
 	printf("%s\n", first);
 }
-void parse_config() {/* TODO */}
+void parse_config() {
+	// TODO: read config vars from XDG_CONFIG_DIR/indus/config(?)
+	// TODO: mkdir -p if it doesn't exist
+	// TODO: live reload(?) - watch for changes to file in another thread
+}
 int cleanup() {
 	/* TODO: sigint handler? */
 	/* TODO: dump history to file */
 	return 0;
+}
+void init() {
+	/* load_history(); */
+	parse_config();
 }
 
 int main(int argc, char** argv) {
@@ -102,7 +107,7 @@ int main(int argc, char** argv) {
 		parse_flags(argc, argv);
 	}
 
-	parse_config();
+	init();
 
 	loop();
 
