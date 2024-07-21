@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -I.
 DEBUG_FLAGS = -g -O0
 LDFLAGS = -lreadline
-SRCS = src.c prompt/prompt.c
+SRCS = src.c prompt/prompt.c utils/utils.c
 OBJS = $(SRCS:.c=.o)
 TARGET = indus
 PREFIX = /usr/local

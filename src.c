@@ -8,34 +8,18 @@
 #include <readline/history.h>
 
 #include "prompt/prompt.h"
-
-/* COLOURS */
-#define COL_RED     "\x1b[31m"
-#define COL_GREEN   "\x1b[32m"
-#define COL_YELLOW  "\x1b[33m"
-#define COL_BLUE    "\x1b[34m"
-#define COL_MAGENTA "\x1b[35m"
-#define COL_CYAN    "\x1b[36m"
-#define COL_RESET   "\x1b[0m"
+#include "utils/utils.h"
 
 #define INPUT_BUFFER 1024
 #define USERNAME_BUFFER 32
 
-#define ACCENT 		COL_YELLOW
-#define PROMPT_CHAR "*"
-
-char pathSplit[] = "/";
-
 // NOTE: Should arg be a char***? For catering to pipes, `&&`, and `||`
-void parse() {}
+char* parse_input(char* input) {
 
-void run() {}
-
-char* copy_string(char* str) {
-	char* copy = malloc(strlen(str) + 1);
-	strcpy(copy, str);
-	return copy;
+	return NULL;
 }
+
+int run() {return 0;}
 
 void loop() {
 	char* username = malloc(USERNAME_BUFFER + 1);
@@ -62,16 +46,15 @@ void loop() {
 
 		printf("%s" ACCENT PROMPT_CHAR COL_RESET " ", prompt);
 		input = readline(NULL);
-		/* TODO: add_history(input); */
 
-		/*arg = parse(input);*/
+		/* arg = parse_input(input); */
 		/*status = run(arg);*/
 
 		printf("No you're a %s\n", input);
 
 		free(input);
 		free(prompt);
-		/*free(arg);*/
+		/* free(arg); */
 
 		input = NULL;
 		prompt = NULL;
@@ -87,9 +70,9 @@ void parse_flags(int argc, char** argv) {
 	printf("%s\n", first);
 }
 void parse_config() {
-	// TODO: read config vars from XDG_CONFIG_DIR/indus/config(?)
-	// TODO: mkdir -p if it doesn't exist
-	// TODO: live reload(?) - watch for changes to file in another thread
+	/* TODO: read config vars from XDG_CONFIG_DIR/indus/config(?) */
+	/* TODO: mkdir -p if it doesn't exist */
+	/* TODO: live reload(?) - watch for changes to file in another thread */
 }
 int cleanup() {
 	/* TODO: sigint handler? */
@@ -97,7 +80,7 @@ int cleanup() {
 	return 0;
 }
 void init() {
-	/* load_history(); */
+	/* load_history(); from file? */
 	parse_config();
 }
 

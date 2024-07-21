@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "prompt.h"
+#include "../utils/utils.h"
 
 char* populate_pwd(char* pwd){
 	if (getcwd(pwd, PATH_MAX) == NULL) {
@@ -47,10 +48,47 @@ char* shorten_home_dir(char* pwd, char* username, char* ret) {
 	return pwd;
 }
 
+char* shorten_path_in_prompt(char* ret) {
+	if (!SHORTEN_PWD) {
+		return ret;
+	}
+
+	char* final_string = copy_string(ret);
+	printf("%s\n", final_string);
+
+	if (!SHORTEN_HOME) {
+		/* 1. /home/maindak 	=>	/h/maindak 	*/
+		/* 2. /home		 		=>	/home 		*/
+
+	} else {
+		/* 3. ~/Documents	 	=>	~/Documents */
+		/* 4. ~/Documents/a 	=>	~/D/a 		*/
+		/* 5. ~			 		=>	~ 			*/
+
+	}
+
+	return ret;
+}
+
+/*
+ * Check Parent directories for git branch
+ * If found, simply strcat it to the end for now
+ * TODO: formatting options?
+ */
+char* show_git_branch(char* ret) {
+	if (!ADD_GIT_BRANCH) {
+		return ret;
+	}
+
+	/* char branchName[GIT_BRANCH_BUFFER_LEN + 1]; */
+
+	return ret;
+}
+
 char* generate_prompt(char* pwd, char* username) {
 	char* ret = malloc(PATH_MAX);
 	if (ret == NULL) {
-		perror("malloc() error");
+		perror("ret malloc() error");
 		return NULL;
 	}
 
@@ -62,13 +100,9 @@ char* generate_prompt(char* pwd, char* username) {
 
 	ret = shorten_home_dir(pwd, username, ret);
 
-	if (SHORTEN_PWD) {
-		// TODO: shorten `~/Documents/xyz` to `~/D/xyz`
-	}
+	ret = shorten_path_in_prompt(ret);
 
-	if (ADD_GIT_BRANCH) {
-		// TODO: in format: `(main)`
-	}
+	ret = show_git_branch(ret);
 
 	return ret;
 }
