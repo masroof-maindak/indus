@@ -29,14 +29,13 @@ char *shorten_home_in_prompt(char *pwd, char *username, char *prompt) {
 		strcat (expect, username);
 
 		if (!strncmp (expect, pwd, size)) { // returns 0 on success
-			ret[0] = '~';
+			prompt[0] = '~';
 			size_t remainingLen = strlen(pwd) - size;
-			if (remainingLen > 0){
-				char* srcPtr = pwd + size;
-				memcpy(ret + 1, srcPtr, remainingLen);
+			if (remainingLen > 0) {
+				char *srcPtr = pwd + size;
+				strcpy(prompt + 1, srcPtr);
 			}
-			ret[remainingLen + 1] = '\0'; // null terminator
-			return ret;
+			return prompt;
 
 		} else {
 			printf ("PWD that brought me here: ... %s\n", pwd);
