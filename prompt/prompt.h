@@ -19,7 +19,7 @@
 #define PROMPT_CHAR "*"
 
 /* FUNCTIONS */
-char *populate_pwd(char* pwd);
+char *populate_pwd();
 char *generate_prompt(char* pwd, char* username);
 
 #endif // PROMPT_H

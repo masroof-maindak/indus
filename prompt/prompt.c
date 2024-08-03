@@ -7,44 +7,51 @@
 #include "prompt.h"
 #include "../utils/utils.h"
 
-char *populate_pwd(char *pwd){
-	if (getcwd(pwd, PATH_MAX) == NULL) {
-		perror("getcwd() error");
+char *populate_pwd() {
+	char *pwd = getcwd(NULL, 0);
+
+	if (pwd == NULL) {
+		perror("getcwd");
 		return NULL;
 	}
 
 	return pwd;
 }
 
-char *shorten_home_in_prompt(char *pwd, char *username, char *prompt) {
+char *shorten_home_in_prompt(char *pwd, char *username) {
 	if (!SHORTEN_HOME) {
 		return pwd;
 	}
 
-	size_t size = strlen(username) + 6;
+	size_t sizeLongHome = strlen(username) + 6;
+	size_t sizeOfPwd = strlen(pwd);
 
-	if (strlen(pwd) >= size) {
-		char expect[size];
-		strcpy (expect, "/home/");
-		strcat (expect, username);
-
-		if (!strncmp (expect, pwd, size)) { // returns 0 on success
-			prompt[0] = '~';
-			size_t remainingLen = strlen(pwd) - size;
-			if (remainingLen > 0) {
-				char *srcPtr = pwd + size;
-				strcpy(prompt + 1, srcPtr);
-			}
-			return prompt;
-
-		} else {
-			printf ("PWD that brought me here: ... %s\n", pwd);
-			return pwd;
-		}
-
+	if (sizeOfPwd < sizeLongHome) {
+		return pwd;
 	}
 
-	return pwd;
+	char longHome[sizeLongHome];
+	strcpy (longHome, "/home/");
+	strcat (longHome, username);
+
+	if (!strncmp (longHome, pwd, sizeLongHome)) {
+		
+		size_t sizeRet = sizeOfPwd - sizeLongHome;
+		char *prompt = malloc(sizeRet);
+		prompt[0] = '~';
+		size_t remainingLen = strlen(pwd) - sizeLongHome;
+
+		if (remainingLen > 0) {
+			char *srcPtr = pwd + sizeLongHome;
+			strcpy(prompt + 1, srcPtr);
+		}
+
+		return prompt;
+
+	} else {
+		fprintf(stderr, "PWD that brought me here: ... %s\n", pwd);
+		return pwd;
+	}
 }
 
 char *shorten_path_in_prompt(char *prompt) {
@@ -105,19 +112,12 @@ char *show_git_branch(char *ret) {
 }
 
 char *generate_prompt(char *pwd, char *username) {
-	char *ret = malloc(PATH_MAX + 1);
-	if (ret == NULL) {
-		perror("ret malloc() error");
-		return NULL;
-	}
 
-	pwd = populate_pwd(pwd);
-	if (pwd == NULL) {
-		free(ret);
-		return NULL;
-	}
+	char *pwdCopy = copy_string(pwd);
 
-	ret = shorten_home_in_prompt(pwd, username, ret);
+	char *ret;
+
+	ret = shorten_home_in_prompt(pwdCopy, username);
 
 	ret = shorten_path_in_prompt(ret);
 

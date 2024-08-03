@@ -29,8 +29,6 @@ void loop() {
 		return;
 	}
 
-	char *pwd = malloc(PATH_MAX);
-
 	char *input;
 	/* char **arg; */
 	/* int status; */
@@ -40,7 +38,7 @@ void loop() {
 	puts("Press Ctrl+c to exit.\n");
 
 	while (1) {
-
+		char *pwd = populate_pwd();
 		char *prompt = generate_prompt(pwd, username);
 
 		printf("%s " ACCENT PROMPT_CHAR COL_RESET " ", prompt);
@@ -49,17 +47,17 @@ void loop() {
 		/* arg = parse_input(input); */
 		/* status = run(arg); */
 
-		printf("No you're a %s\n", input);
-
+		free(pwd);
 		free(input);
 		free(prompt);
 		/* free(arg); */
-
+		
+		pwd = NULL;
 		input = NULL;
 		prompt = NULL;
+		/* arg = null; */
 	}
 
-	free(pwd);
 	free(username);
 }
 
