@@ -1,28 +1,25 @@
+#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <linux/limits.h>
 
-#include <readline/readline.h>
 #include <readline/history.h>
+#include <readline/readline.h>
 
 #include "prompt/prompt.h"
 #include "utils/utils.h"
 
-#define INPUT_BUFFER 1024
+#define INPUT_BUFFER	1024
 #define USERNAME_BUFFER 32
 
-char *parse_input(char *input) {
+char *parse_input(char *input) { return NULL; }
 
-	return NULL;
-}
-
-int run() {return 0;}
+int run() { return 0; }
 
 void loop() {
 	char *username = malloc(USERNAME_BUFFER + 1);
-	username = getlogin();
+	username	   = getlogin();
 
 	if (username == NULL) {
 		perror("getlogin() error");
@@ -38,7 +35,7 @@ void loop() {
 	puts("Press Ctrl+c to exit.\n");
 
 	while (1) {
-		char *pwd = populate_pwd();
+		char *pwd	 = populate_pwd();
 		char *prompt = generate_prompt(pwd, username);
 
 		printf("%s " ACCENT PROMPT_CHAR COL_RESET " ", prompt);
@@ -51,9 +48,9 @@ void loop() {
 		free(input);
 		free(prompt);
 		/* free(arg); */
-		
-		pwd = NULL;
-		input = NULL;
+
+		pwd	   = NULL;
+		input  = NULL;
 		prompt = NULL;
 		/* arg = null; */
 	}
@@ -66,16 +63,19 @@ void parse_flags(int argc, char **argv) {
 	char *first = copy_string(argv[1]);
 	printf("%s\n", first);
 }
+
 void parse_config() {
 	/* TODO: read config vars from XDG_CONFIG_DIR/indus/config(?) */
 	/* TODO: mkdir -p if it doesn't exist */
 	/* TODO: live reload(?) - watch for changes to file in another thread */
 }
+
 int cleanup() {
 	/* TODO: sigint handler? */
 	/* TODO: dump history to file */
 	return 0;
 }
+
 void init() {
 	/* load_history(); from file? */
 	parse_config();

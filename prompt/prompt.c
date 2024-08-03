@@ -1,11 +1,11 @@
+#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <linux/limits.h>
 #include <string.h>
+#include <unistd.h>
 
-#include "prompt.h"
 #include "../utils/utils.h"
+#include "prompt.h"
 
 char *populate_pwd() {
 	char *pwd = getcwd(NULL, 0);
@@ -24,21 +24,21 @@ char *shorten_home_in_prompt(char *pwd, char *username) {
 	}
 
 	size_t sizeLongHome = strlen(username) + 6;
-	size_t sizeOfPwd = strlen(pwd);
+	size_t sizeOfPwd	= strlen(pwd);
 
 	if (sizeOfPwd < sizeLongHome) {
 		return pwd;
 	}
 
 	char longHome[sizeLongHome];
-	strcpy (longHome, "/home/");
-	strcat (longHome, username);
+	strcpy(longHome, "/home/");
+	strcat(longHome, username);
 
-	if (!strncmp (longHome, pwd, sizeLongHome)) {
-		
-		size_t sizeRet = sizeOfPwd - sizeLongHome;
-		char *prompt = malloc(sizeRet);
-		prompt[0] = '~';
+	if (!strncmp(longHome, pwd, sizeLongHome)) {
+
+		size_t sizeRet		= sizeOfPwd - sizeLongHome;
+		char *prompt		= malloc(sizeRet);
+		prompt[0]			= '~';
 		size_t remainingLen = strlen(pwd) - sizeLongHome;
 
 		if (remainingLen > 0) {
@@ -59,24 +59,24 @@ char *shorten_path_in_prompt(char *prompt) {
 		return prompt;
 	}
 
-	char *promptBkp = copy_string(prompt);
+	char *promptBkp	 = copy_string(prompt);
 	char *backupCopy = promptBkp;
-	int counter = 0;
+	int counter		 = 0;
 
 	if (promptBkp[0] == '/') {
 		promptBkp++;
 		counter++;
 	}
-	
+
 	char *word = NULL, *prev = NULL;
 
 	if ((word = strtok(promptBkp, "/")) != NULL) {
 		while (word) {
 			prompt[counter++] = word[0];
-			prev = word;
+			prev			  = word;
 
 			if ((word = strtok(NULL, "/")) == NULL) {
-				char* destPtr = prompt + counter;
+				char *destPtr = prompt + counter;
 				strcpy(destPtr, prev + 1);
 			} else {
 				prompt[counter++] = '/';

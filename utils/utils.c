@@ -10,11 +10,11 @@ char *copy_string(char *str) {
 		// CHECK: Any reason to go for one of the aforementioned over the other?
 		return NULL;
 	}
-    char *copy = malloc(strlen(str) + 1);
-    if (copy == NULL) {
-        perror("copy malloc() error");
-        return NULL;
-    }
-    strcpy(copy, str);
-    return copy;
+	char *copy = malloc(strlen(str) + 1);
+	if (copy == NULL) {
+		perror("copy malloc() error");
+		return NULL;
+	}
+	strcpy(copy, str);
+	return copy;
 }
