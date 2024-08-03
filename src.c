@@ -13,8 +13,7 @@
 #define INPUT_BUFFER 1024
 #define USERNAME_BUFFER 32
 
-// NOTE: Should arg be a char***? For catering to pipes, `&&`, and `||`
-char* parse_input(char* input) {
+char *parse_input(char *input) {
 
 	return NULL;
 }
@@ -22,7 +21,7 @@ char* parse_input(char* input) {
 int run() {return 0;}
 
 void loop() {
-	char* username = malloc(USERNAME_BUFFER + 1);
+	char *username = malloc(USERNAME_BUFFER + 1);
 	username = getlogin();
 
 	if (username == NULL) {
@@ -32,8 +31,8 @@ void loop() {
 
 	char *pwd = malloc(PATH_MAX);
 
-	char* input;
-	/* char** arg; */
+	char *input;
+	/* char **arg; */
 	/* int status; */
 
 	printf("Greetings, %s. Welcome to Indus.\n", username);
@@ -48,7 +47,7 @@ void loop() {
 		input = readline(NULL);
 
 		/* arg = parse_input(input); */
-		/*status = run(arg);*/
+		/* status = run(arg); */
 
 		printf("No you're a %s\n", input);
 
@@ -64,9 +63,9 @@ void loop() {
 	free(username);
 }
 
-void parse_flags(int argc, char** argv) {
+void parse_flags(int argc, char **argv) {
 	/* TODO */
-	char* first = copy_string(argv[1]);
+	char *first = copy_string(argv[1]);
 	printf("%s\n", first);
 }
 void parse_config() {
@@ -84,7 +83,7 @@ void init() {
 	parse_config();
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
 	if (argc > 1) {
 		parse_flags(argc, argv);

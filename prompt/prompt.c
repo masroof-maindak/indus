@@ -7,7 +7,7 @@
 #include "prompt.h"
 #include "../utils/utils.h"
 
-char* populate_pwd(char* pwd){
+char *populate_pwd(char *pwd){
 	if (getcwd(pwd, PATH_MAX) == NULL) {
 		perror("getcwd() error");
 		return NULL;
@@ -16,7 +16,7 @@ char* populate_pwd(char* pwd){
 	return pwd;
 }
 
-char* shorten_home_dir(char* pwd, char* username, char* ret) {
+char *shorten_home_in_prompt(char *pwd, char *username, char *prompt) {
 	if (!SHORTEN_HOME) {
 		return pwd;
 	}
@@ -48,9 +48,9 @@ char* shorten_home_dir(char* pwd, char* username, char* ret) {
 	return pwd;
 }
 
-char* shorten_path_in_prompt(char* ret) {
-	if (!SHORTEN_PWD) {
-		return ret;
+char *shorten_path_in_prompt(char *prompt) {
+	if (!SHORTEN_PWD || strlen(prompt) == 1) {
+		return prompt;
 	}
 
 	char* final_string = copy_string(ret);
@@ -75,7 +75,7 @@ char* shorten_path_in_prompt(char* ret) {
  * If found, simply strcat it to the end for now
  * TODO: formatting options?
  */
-char* show_git_branch(char* ret) {
+char *show_git_branch(char *ret) {
 	if (!ADD_GIT_BRANCH) {
 		return ret;
 	}
@@ -85,8 +85,8 @@ char* show_git_branch(char* ret) {
 	return ret;
 }
 
-char* generate_prompt(char* pwd, char* username) {
-	char* ret = malloc(PATH_MAX);
+char *generate_prompt(char *pwd, char *username) {
+	char *ret = malloc(PATH_MAX + 1);
 	if (ret == NULL) {
 		perror("ret malloc() error");
 		return NULL;
@@ -98,7 +98,7 @@ char* generate_prompt(char* pwd, char* username) {
 		return NULL;
 	}
 
-	ret = shorten_home_dir(pwd, username, ret);
+	ret = shorten_home_in_prompt(pwd, username, ret);
 
 	ret = shorten_path_in_prompt(ret);
 
