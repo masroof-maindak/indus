@@ -43,7 +43,7 @@ void loop() {
 
 		char *prompt = generate_prompt(pwd, username);
 
-		printf("%s" ACCENT PROMPT_CHAR COL_RESET " ", prompt);
+		printf("%s " ACCENT PROMPT_CHAR COL_RESET " ", prompt);
 		input = readline(NULL);
 
 		/* arg = parse_input(input); */
