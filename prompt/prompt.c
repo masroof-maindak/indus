@@ -52,21 +52,41 @@ char *shorten_path_in_prompt(char *prompt) {
 		return prompt;
 	}
 
-	char* final_string = copy_string(ret);
-	printf("%s\n", final_string);
+	char *promptBkp = copy_string(prompt);
+	char *backupCopy = promptBkp;
+	int counter = 0;
 
-	if (!SHORTEN_HOME) {
-		/* 1. /home/maindak 	=>	/h/maindak 	*/
-		/* 2. /home		 		=>	/home 		*/
+	if (promptBkp[0] == '/') {
+		promptBkp++;
+		counter++;
+	}
+	
+	char *word = NULL, *prev = NULL;
 
-	} else {
-		/* 3. ~/Documents	 	=>	~/Documents */
-		/* 4. ~/Documents/a 	=>	~/D/a 		*/
-		/* 5. ~			 		=>	~ 			*/
+	if ((word = strtok(promptBkp, "/")) != NULL) {
+		while (word) {
+			prompt[counter++] = word[0];
+			prev = word;
 
+			if ((word = strtok(NULL, "/")) == NULL) {
+				char* destPtr = prompt + counter;
+				strcpy(destPtr, prev + 1);
+			} else {
+				prompt[counter++] = '/';
+			}
+		}
 	}
 
-	return ret;
+	/*
+	 * If preserving memory were a concern,
+	 * we could reallocate `prompt` to strlen(prompt) to not 'waste' space.
+	 *
+	 * But since this function will run at every iteration of the program's
+	 * main command loop, it's better to not do this.
+	 */
+
+	free(backupCopy);
+	return prompt;
 }
 
 /*
