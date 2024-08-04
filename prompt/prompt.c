@@ -49,7 +49,7 @@ char *shorten_home_in_prompt(char *pwd, char *username) {
 		return prompt;
 
 	} else {
-		fprintf(stderr, "PWD that brought me here: ... %s\n", pwd);
+		fprintf(stderr, "strncmp error in shorten_home_in_prompt: %s\n", pwd);
 		return pwd;
 	}
 }
@@ -59,9 +59,9 @@ char *shorten_path_in_prompt(char *prompt) {
 		return prompt;
 	}
 
-	char *promptBkp	 = copy_string(prompt);
-	char *backupCopy = promptBkp;
-	int counter		 = 0;
+	char *promptBkp = copy_string(prompt);
+	char *copySave = promptBkp;
+	int counter		= 0;
 
 	if (promptBkp[0] == '/') {
 		promptBkp++;
@@ -84,15 +84,7 @@ char *shorten_path_in_prompt(char *prompt) {
 		}
 	}
 
-	/*
-	 * If preserving memory were a concern,
-	 * we could reallocate `prompt` to strlen(prompt) to not 'waste' space.
-	 *
-	 * But since this function will run at every iteration of the program's
-	 * main command loop, it's better to not do this.
-	 */
-
-	free(backupCopy);
+	free(copySave);
 	return prompt;
 }
 
@@ -112,7 +104,6 @@ char *show_git_branch(char *ret) {
 }
 
 char *generate_prompt(char *pwd, char *username) {
-
 	char *pwdCopy = copy_string(pwd);
 
 	char *ret;
