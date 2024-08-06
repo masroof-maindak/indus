@@ -28,7 +28,7 @@ char *get_username() {
 
 	if (pw)
 		return pw->pw_name;
-	
+
 	endpwent();
 	return NULL;
 }

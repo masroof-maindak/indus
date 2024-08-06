@@ -1,4 +1,3 @@
-#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,7 +9,6 @@
 #include "prompt/prompt.h"
 #include "utils/utils.h"
 
-#define INPUT_BUFFER	1024
 #define USERNAME_BUFFER 32
 
 char *parse_input(char *input) { return NULL; }
@@ -90,9 +88,8 @@ void init() {
 
 int main(int argc, char **argv) {
 
-	if (argc > 1) {
+	if (argc > 1)
 		parse_flags(argc, argv);
-	}
 
 	init();
 
