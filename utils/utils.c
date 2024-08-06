@@ -1,7 +1,10 @@
 #include "utils.h"
+#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 char *copy_string(char *str) {
 	if (str == NULL) {
@@ -17,4 +20,15 @@ char *copy_string(char *str) {
 
 	strcpy(copy, str);
 	return copy;
+}
+
+char *get_username() {
+	setpwent();
+	struct passwd *pw = getpwuid(geteuid());
+
+	if (pw)
+		return pw->pw_name;
+	
+	endpwent();
+	return NULL;
 }

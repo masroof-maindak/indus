@@ -19,10 +19,10 @@ int run() { return 0; }
 
 void loop() {
 	char *username = malloc(USERNAME_BUFFER + 1);
-	username	   = getlogin();
+	username	   = get_username();
 
 	if (username == NULL) {
-		perror("getlogin() error");
+		fputs("Failed to fetch username\n", stderr);
 		return;
 	}
 
