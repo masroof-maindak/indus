@@ -7,15 +7,34 @@
 #include "../utils/utils.h"
 #include "prompt.h"
 
-char *populate_pwd() {
-	char *pwd = getcwd(NULL, 0);
+char *get_pwd() {
+	long int path_max;
+	size_t size;
+	char *buf;
+	char *ptr;
 
-	if (pwd == NULL) {
-		perror("getcwd");
-		return NULL;
+	path_max = pathconf(".", _PC_PATH_MAX);
+	if (path_max == -1)
+		size = 1024;
+	else if (path_max > 10240)
+		size = 10240;
+	else
+		size = path_max;
+
+	for (buf = ptr = NULL; ptr == NULL; size *= 2) {
+		if ((buf = realloc(buf, size)) == NULL) {
+			perror("realloc()");
+			return NULL;
+		}
+
+		ptr = getcwd(buf, size);
+		if (ptr == NULL && errno != ERANGE) {
+			perror("getcwd()");
+			return NULL;
+		}
 	}
 
-	return pwd;
+	return ptr;
 }
 
 char *shorten_home_in_prompt(char *pwd, char *username) {

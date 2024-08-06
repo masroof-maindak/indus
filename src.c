@@ -35,7 +35,14 @@ void loop() {
 	puts("Press Ctrl+c to exit.\n");
 
 	while (1) {
-		char *pwd	 = populate_pwd();
+		char *pwd = get_pwd();
+
+		if (pwd == NULL) {
+			fputs("Failed to fetch pwd\n", stderr);
+			free(username);
+			return;
+		}
+
 		char *prompt = generate_prompt(pwd, username);
 
 		printf("%s " ACCENT PROMPT_CHAR COL_RESET " ", prompt);
