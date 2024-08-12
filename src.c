@@ -1,17 +1,20 @@
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#include <readline/history.h>
-#include <readline/readline.h>
 
 #include "prompt/prompt.h"
 #include "utils/utils.h"
 
 #define USERNAME_BUFFER 32
 
-char *parse_input(char *input) { return NULL; }
+char **parse_input(char *input) {
+	char **args;
+	char *arg;
+
+	return NULL;
+}
 
 int run() { return 0; }
 
@@ -56,52 +59,29 @@ void loop() {
 		printf("input: %s\n", input);
 
 		args = parse_input(input);
+		/* status = run(args); */
 
 		free(pwd);
 		free(input);
 		free(prompt);
-		/* free(arg); */
-
-		pwd	   = NULL;
-		input  = NULL;
-		prompt = NULL;
-		/* arg = null; */
+		free(args);
 	}
 
 	free(username);
 }
 
-void parse_flags(int argc, char **argv) {
-	/* TODO */
-	char *first = copy_string(argv[1]);
-	printf("%s\n", first);
-}
-
-void parse_config() {
-	/* TODO: read config vars from XDG_CONFIG_DIR/indus/config(?) */
-	/* TODO: mkdir -p if it doesn't exist */
-	/* TODO: live reload(?) - watch for changes to file in another thread */
-}
-
 int cleanup() {
-	/* TODO: sigint handler? */
 	/* TODO: dump history to file */
 	return 0;
 }
 
 void init() {
+	/* signal(SIGINT, SIG_IGN); */
 	/* load_history(); from file? */
-	parse_config();
 }
 
-int main(int argc, char **argv) {
-
-	if (argc > 1)
-		parse_flags(argc, argv);
-
+int main(/* int argc, char **argv, char **envp */) {
 	init();
-
 	loop();
-
 	return cleanup();
 }
