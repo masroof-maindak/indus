@@ -24,8 +24,8 @@ void loop() {
 		return;
 	}
 
-	char *input;
-	/* char **arg; */
+	char *input = NULL;
+	char **args;
 	/* int status; */
 
 	printf("Greetings, %s. Welcome to Indus.\n", username);
@@ -44,10 +44,18 @@ void loop() {
 		char *prompt = generate_prompt(pwd, username);
 
 		printf("%s " ACCENT PROMPT_CHAR COL_RESET " ", prompt);
-		input = readline(NULL);
 
-		/* arg = parse_input(input); */
-		/* status = run(arg); */
+		input = get_line();
+
+		if (input == NULL) {
+			free(pwd);
+			free(prompt);
+			continue;
+		}
+
+		printf("input: %s\n", input);
+
+		args = parse_input(input);
 
 		free(pwd);
 		free(input);

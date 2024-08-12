@@ -1,10 +1,14 @@
 #include "utils.h"
+
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <readline/history.h>
+#include <readline/readline.h>
 
 char *copy_string(char *str) {
 	if (str == NULL) {
@@ -31,4 +35,11 @@ char *get_username() {
 
 	endpwent();
 	return NULL;
+}
+
+char *get_line() {
+	char *input;
+	input = readline(NULL);
+	add_history(input);
+	return input;
 }
