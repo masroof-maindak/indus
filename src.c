@@ -1,4 +1,3 @@
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,10 +9,39 @@
 #define USERNAME_BUFFER 32
 
 char **parse_input(char *input) {
-	char **args;
-	char *arg;
+	int numArgs = 8;
+	int counter = 0;
+	char *arg	= NULL;
+	char **args = malloc(numArgs * sizeof(char *));
 
-	return NULL;
+	if (args == NULL) {
+		perror("malloc()");
+		return NULL;
+	}
+
+	char *inputBkp = copy_string(input);
+	char *copySave = inputBkp;
+	char delim[]   = " \t\r\n\a";
+
+	if ((arg = strtok(inputBkp, delim)) != NULL) {
+		do {
+			args[counter++] = arg;
+
+			if (counter > numArgs) {
+				numArgs *= 2;
+				args = realloc(args, numArgs);
+				if (args == NULL) {
+					perror("realloc()");
+					return NULL;
+				}
+			}
+
+		} while ((arg = strtok(NULL, delim)) != NULL);
+	}
+
+	args[counter] = NULL;
+	free(copySave);
+	return args;
 }
 
 int run() { return 0; }
@@ -28,7 +56,7 @@ void loop() {
 	}
 
 	char *input = NULL;
-	char **args;
+	char **args = NULL;
 	/* int status; */
 
 	printf("Greetings, %s. Welcome to Indus.\n", username);
@@ -58,7 +86,7 @@ void loop() {
 
 		printf("input: %s\n", input);
 
-		args = parse_input(input);
+		/* args = parse_input(input); */
 		/* status = run(args); */
 
 		free(pwd);
