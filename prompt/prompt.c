@@ -54,8 +54,14 @@ char *shorten_home_in_pwd(char *pwd, char *username) {
 
 	if (!strncmp(longHome, pwd, sizeLongHome)) {
 
-		size_t sizeRet		= sizeOfPwd - sizeLongHome;
-		char *prompt		= malloc(sizeRet);
+		size_t sizeRet = sizeOfPwd - sizeLongHome;
+		char *prompt   = malloc(sizeRet);
+
+		if (prompt == NULL) {
+			perror("malloc()");
+			return pwd;
+		}
+
 		prompt[0]			= '~';
 		size_t remainingLen = strlen(pwd) - sizeLongHome;
 
