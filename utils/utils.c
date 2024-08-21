@@ -26,17 +26,48 @@ char *copy_string(char *str) {
 char *get_username() {
 	setpwent();
 	struct passwd *pw = getpwuid(geteuid());
+	endpwent();
 
 	if (pw)
 		return pw->pw_name;
 
-	endpwent();
 	return NULL;
 }
 
-char *get_line() {
-	char *input;
-	input = readline(NULL);
-	add_history(input);
-	return input;
+char **parse_input(char *input) {
+	if (input == NULL || input[0] == '\0')
+		return NULL;
+
+	char delim[] = " \t\r\n\a";
+	char *save	 = input;
+	int numArgs	 = 8;
+	int counter	 = 0;
+	char *arg	 = NULL;
+	char **args	 = malloc(numArgs * sizeof(char *));
+
+	if (args == NULL) {
+		perror("malloc()");
+		return NULL;
+	}
+
+	if ((arg = strtok(input, delim)) != NULL) {
+		do {
+			args[counter++] = arg;
+
+			if (counter > numArgs) {
+				numArgs *= 2;
+				args = realloc(args, numArgs);
+				if (args == NULL) {
+					perror("realloc()");
+					return NULL;
+				}
+			}
+
+		} while ((arg = strtok(NULL, delim)) != NULL);
+	}
+
+	args[counter] = NULL;
+	input		  = save;
+
+	return args;
 }

@@ -9,40 +9,17 @@
 
 #define USERNAME_BUFFER 32
 
-char **parse_input(char *input) {
-	int numArgs = 8;
-	int counter = 0;
-	char *arg	= NULL;
-	char **args = malloc(numArgs * sizeof(char *));
+int execute(char **args) {
+	if (args == NULL)
+		return 0;
 
-	if (args == NULL) {
-		perror("malloc()");
-		return NULL;
-	}
+	for (int i = 0; i < num_builtins(); i++)
+		if (!strcmp(args[0], builtins_str[i]))
+			return builtins_fn[i](args);
 
-	char *inputBkp = copy_string(input);
-	char *copySave = inputBkp;
-	char delim[]   = " \t\r\n\a";
+	// TODO: fork() & exec()
 
-	if ((arg = strtok(inputBkp, delim)) != NULL) {
-		do {
-			args[counter++] = arg;
-
-			if (counter > numArgs) {
-				numArgs *= 2;
-				args = realloc(args, numArgs);
-				if (args == NULL) {
-					perror("realloc()");
-					return NULL;
-				}
-			}
-
-		} while ((arg = strtok(NULL, delim)) != NULL);
-	}
-
-	args[counter] = NULL;
-	free(copySave);
-	return args;
+	return 0;
 }
 
 int run() { return 0; }
@@ -58,17 +35,17 @@ void loop() {
 
 	char *input = NULL;
 	char **args = NULL;
-	/* int status; */
+	int status	= 0;
 
 	printf("Greetings, %s. Welcome to Indus.\n", username);
 	printf("Type " ACCENT "help" COL_RESET " to get started.\n");
 	puts("Press Ctrl+c to exit.\n");
 
 	while (1) {
-		char *pwd = get_pwd();
+		char *prompt = NULL;
+		char *pwd	 = get_pwd();
 
 		if (pwd == NULL) {
-			fputs("Failed to fetch pwd\n", stderr);
 			free(username);
 			return;
 		}
