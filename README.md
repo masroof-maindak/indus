@@ -4,18 +4,20 @@
 - [x] prompt generation functions
 - [x] getcwd()
 - [/] Execution loop
-    - [/] Input
+    - [x] Input
     - [x] Parse arguments
     - [ ] fork()/exec() calls to run program
-- [ ] Built-ins
-    - [ ] Implemented via function pointers?
+- [/] Built-ins
+    - [x] Implemented via function pointers?
     - [ ] cd
+    - [ ] ls
+    - [ ] rm
     - [ ] help
-    - [ ] whoami
+    - [ ] exit
 - [ ] Abbreviations like Fish
+- [ ] File redirection (output) - `>>`, `>`
 - [ ] Pipes - `|`
 - [ ] Conditionals - `&&`, `||`
 - [ ] Asynchronous execution - `&`
-- [ ] File redirection (output) - `>>`, `>`
-- [ ] autocompletion -> edit distance algo (Levenshtein/Jaro Wrinkler)
+- [ ] autocompletion -> Edit Distance algo (Levenshtein/Jaro Wrinkler)
 
