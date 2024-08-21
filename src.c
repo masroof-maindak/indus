@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "builtins/builtins.h"
 #include "prompt/prompt.h"
 #include "utils/utils.h"
 
