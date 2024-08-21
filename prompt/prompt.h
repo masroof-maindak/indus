@@ -1,10 +1,10 @@
 #ifndef PROMPT_H
 #define PROMPT_H
 
-#define SHORTEN_HOME		  0
-#define SHORTEN_PWD			  1
-#define ADD_GIT_BRANCH		  1
-#define GIT_BRANCH_BUFFER_LEN 256
+#define SHORTEN_HOME 1
+#define SHORTEN_PWD	 1
+/* #define ADD_GIT_BRANCH		  1 */
+/* #define GIT_BRANCH_BUFFER_LEN 256 */
 
 /* COLOURS */
 #define COL_RED		"\x1b[31m"
@@ -20,6 +20,7 @@
 
 /* FUNCTIONS */
 char *get_pwd();
+char *get_line(char *prompt);
 char *generate_prompt(char *pwd, char *username);
 
 #endif // PROMPT_H

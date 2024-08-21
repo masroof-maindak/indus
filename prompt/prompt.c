@@ -8,6 +8,14 @@
 #include "../utils/utils.h"
 #include "prompt.h"
 
+#include <readline/readline.h>
+
+char *get_line(char *prompt) {
+	char display[strlen(prompt) + 3];
+	sprintf(display, "%s " ACCENT PROMPT_CHAR COL_RESET " ", prompt);
+	return readline(display);
+}
+
 char *get_pwd() {
 	long int path_max;
 	size_t size;
@@ -110,30 +118,11 @@ char *shorten_path_in_pwd(char *pwd) {
 	return pwd;
 }
 
-/*
- * Check Parent directories for git branch
- * If found, simply strcat it to the end for now
- * TODO: formatting options?
- */
-char *show_git_branch(char *pwd) {
-	if (!ADD_GIT_BRANCH)
-		return pwd;
-
-	/* char branchName[GIT_BRANCH_BUFFER_LEN + 1]; */
-
-	return pwd;
-}
-
 char *generate_prompt(char *pwd, char *username) {
-
 	char *ret;
 	char *pwdCopy = copy_string(pwd);
 
 	ret = shorten_home_in_pwd(pwdCopy, username);
-
 	ret = shorten_path_in_pwd(ret);
-
-	ret = show_git_branch(ret);
-
 	return ret;
 }

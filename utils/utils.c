@@ -7,9 +7,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <readline/history.h>
-#include <readline/readline.h>
-
 char *copy_string(char *str) {
 	if (str == NULL) {
 		fputs("copy_string receieved null input string\n", stderr);

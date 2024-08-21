@@ -73,41 +73,23 @@ void loop() {
 			return;
 		}
 
-		char *prompt = generate_prompt(pwd, username);
-
-		printf("%s " ACCENT PROMPT_CHAR COL_RESET " ", prompt);
-
-		input = get_line();
-
-		if (input == NULL) {
-			free(pwd);
-			free(prompt);
-			continue;
-		}
-
-		printf("input: %s\n", input);
-
-		/* args = parse_input(input); */
-		/* status = run(args); */
+		prompt = generate_prompt(pwd, username);
+		input  = get_line(prompt);
+		args   = parse_input(input);
+		status = execute(args);
 
 		free(pwd);
-		free(input);
 		free(prompt);
+		free(input);
 		free(args);
 	}
 
 	free(username);
 }
 
-int cleanup() {
-	/* TODO: dump history to file */
-	return 0;
-}
+int cleanup() { return 0; }
 
-void init() {
-	/* signal(SIGINT, SIG_IGN); */
-	/* load_history(); from file? */
-}
+void init() { /* signal(SIGINT, SIG_IGN); */ }
 
 int main(/* int argc, char **argv, char **envp */) {
 	init();
