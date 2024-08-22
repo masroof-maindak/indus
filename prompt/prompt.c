@@ -50,35 +50,34 @@ char *shorten_home_in_pwd(char *pwd, char *username) {
 	if (!SHORTEN_HOME)
 		return pwd;
 
-	size_t sizeLongHome = strlen(username) + 6;
+	size_t sizeFullHome = strlen(username) + 6;
 	size_t sizeOfPwd	= strlen(pwd);
 
-	if (sizeOfPwd < sizeLongHome)
+	char fullHome[sizeFullHome];
+	sprintf(fullHome, "/home/%s", username);
+
+	if (sizeOfPwd < sizeFullHome)
 		return pwd;
 
-	char longHome[sizeLongHome];
-	strcpy(longHome, "/home/");
-	strcat(longHome, username);
+	if (!strncmp(fullHome, pwd, sizeFullHome)) {
 
-	if (!strncmp(longHome, pwd, sizeLongHome)) {
+		size_t sizeRemaining = sizeOfPwd - sizeFullHome + 1; // ~
+		char *ret			 = malloc(sizeRemaining + 1);	 // \0
 
-		size_t sizeRet = sizeOfPwd - sizeLongHome;
-		char *prompt   = malloc(sizeRet);
-
-		if (prompt == NULL) {
+		if (ret == NULL) {
 			perror("malloc()");
 			return pwd;
 		}
 
-		prompt[0]			= '~';
-		size_t remainingLen = strlen(pwd) - sizeLongHome;
+		ret[0] = '~';
 
-		if (remainingLen > 0) {
-			char *srcPtr = pwd + sizeLongHome;
-			strcpy(prompt + 1, srcPtr);
+		if (sizeRemaining > 0) {
+			char *srcPtr = pwd + sizeFullHome;
+			strcpy(ret + 1, srcPtr);
 		}
 
-		return prompt;
+		free(pwd);
+		return ret;
 	}
 
 	fprintf(stderr, "strncmp error in shorten_home_in_pwd: %s\n", pwd);
@@ -121,6 +120,9 @@ char *shorten_path_in_pwd(char *pwd) {
 char *generate_prompt(char *pwd, char *username) {
 	char *ret;
 	char *pwdCopy = copy_string(pwd);
+
+	if (pwdCopy == NULL)
+		return pwd;
 
 	ret = shorten_home_in_pwd(pwdCopy, username);
 	ret = shorten_path_in_pwd(ret);

@@ -2,7 +2,7 @@
 #define PROMPT_H
 
 #define SHORTEN_HOME 1
-#define SHORTEN_PWD	 1
+#define SHORTEN_PWD	 0
 /* #define ADD_GIT_BRANCH		  1 */
 /* #define GIT_BRANCH_BUFFER_LEN 256 */
 
