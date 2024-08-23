@@ -14,10 +14,9 @@
     - [ ] rm
     - [ ] help
     - [ ] exit
-- [ ] Abbreviations like Fish
-- [ ] File redirection (output) - `>>`, `>`
 - [ ] Pipes - `|`
 - [ ] Conditionals - `&&`, `||`
+- [ ] File redirection (output) - `>>`, `>`
 - [ ] Asynchronous execution - `&`
 - [ ] autocompletion -> Edit Distance algo (Levenshtein/Jaro Wrinkler)
-
+- [-] Abbreviations like Fish
