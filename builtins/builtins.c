@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <unistd.h> 
 #include <stdlib.h>
+#include <pwd.h>
 
 #include "builtins.h"
 
@@ -26,9 +28,25 @@ int indus_ls(char **args) {
 }
 
 int indus_cd(char **args) {
+	char* dir;
 	if (args[1] == NULL) {
 		// CD to home
+		struct passwd *pw =getpwuid(getuid());
+		if (pw==NULL){
+			perror("getpwuid() error");
+			return 1;
+		}
+		dir = pw->pw_dir;
 	}
+	else {
+		dir = args[1];
+	}
+
+	//change to dir
+	if (chdir(dir) != 0) {
+        perror("chdir() error");
+        return 1;
+    }
 
 	return 0;
 }
