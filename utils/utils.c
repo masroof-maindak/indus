@@ -23,15 +23,23 @@ char *copy_string(char *str) {
 	return copy;
 }
 
-char *get_username() {
+void init_user_info(struct USER_INFO *curr_user) {
 	setpwent();
-	struct passwd *pw = getpwuid(geteuid());
+
+	struct passwd *entry;
+	entry = getpwuid(getuid());
+
+	if (entry) {
+		curr_user->uid	= entry->pw_uid;
+		curr_user->name = entry->pw_name;
+		curr_user->home = entry->pw_dir;
+	} else {
+		curr_user->uid	= -1;
+		curr_user->name = "ERROR_USER";
+		curr_user->home = "/";
+	}
+
 	endpwent();
-
-	if (pw)
-		return pw->pw_name;
-
-	return NULL;
 }
 
 char **parse_input(char *input) {

@@ -1,3 +1,6 @@
+#include "prompt.h"
+#include "../utils/utils.h"
+
 #include <errno.h>
 #include <linux/limits.h>
 #include <stdio.h>
@@ -5,10 +8,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../utils/utils.h"
-#include "prompt.h"
-
 #include <readline/readline.h>
+
+extern struct USER_INFO currentUser;
 
 char *get_line(char *prompt) {
 	char display[strlen(prompt) + 3];
@@ -46,23 +48,20 @@ char *get_pwd() {
 	return ptr;
 }
 
-char *shorten_home_in_pwd(char *pwd, char *username) {
+char *shorten_home_in_pwd(char *pwd) {
 	if (!SHORTEN_HOME)
 		return pwd;
 
-	size_t sizeFullHome = strlen(username) + 6;
-	size_t sizeOfPwd	= strlen(pwd);
+	size_t sizeOfHome = strlen(currentUser.home);
+	size_t sizeOfPwd  = strlen(pwd);
 
-	char fullHome[sizeFullHome];
-	sprintf(fullHome, "/home/%s", username);
-
-	if (sizeOfPwd < sizeFullHome)
+	if (sizeOfPwd < sizeOfHome)
 		return pwd;
 
-	if (!strncmp(fullHome, pwd, sizeFullHome)) {
+	if (!strncmp(currentUser.home, pwd, sizeOfHome)) {
 
-		size_t sizeRemaining = sizeOfPwd - sizeFullHome + 1; // ~
-		char *ret			 = malloc(sizeRemaining + 1);	 // \0
+		size_t sizeRemaining = sizeOfPwd - sizeOfHome + 1; // ~
+		char *ret			 = malloc(sizeRemaining + 1);
 
 		if (ret == NULL) {
 			perror("malloc()");
@@ -71,16 +70,12 @@ char *shorten_home_in_pwd(char *pwd, char *username) {
 
 		ret[0] = '~';
 
-		if (sizeRemaining > 0) {
-			char *srcPtr = pwd + sizeFullHome;
-			strcpy(ret + 1, srcPtr);
-		}
+		if (sizeRemaining > 0)
+			strcpy(ret + 1, pwd + sizeOfHome);
 
-		free(pwd);
 		return ret;
 	}
 
-	fprintf(stderr, "strncmp error in shorten_home_in_pwd: %s\n", pwd);
 	return pwd;
 }
 
@@ -105,11 +100,10 @@ char *shorten_path_in_pwd(char *pwd) {
 			pwd[counter++] = word[0];
 			prev		   = word;
 
-			if ((word = strtok(NULL, "/")) == NULL) {
+			if ((word = strtok(NULL, "/")) == NULL)
 				strcpy(pwd + counter, prev + 1);
-			} else {
+			else
 				pwd[counter++] = '/';
-			}
 		}
 	}
 
@@ -117,14 +111,9 @@ char *shorten_path_in_pwd(char *pwd) {
 	return pwd;
 }
 
-char *generate_prompt(char *pwd, char *username) {
+char *generate_prompt(char *pwd) {
 	char *ret;
-	char *pwdCopy = copy_string(pwd);
-
-	if (pwdCopy == NULL)
-		return pwd;
-
-	ret = shorten_home_in_pwd(pwdCopy, username);
+	ret = shorten_home_in_pwd(pwd);
 	ret = shorten_path_in_pwd(ret);
 	return ret;
 }
