@@ -10,7 +10,6 @@
 
 extern struct USER_INFO currentUser;
 
-/* CHECK: Valgrind Errors */
 char *expand_tilde(char *path) {
 	if (path == NULL || path[0] != '~')
 		return copy_string(path);
@@ -23,9 +22,6 @@ char *expand_tilde(char *path) {
 		perror("malloc()");
 		return copy_string(path);
 	}
-
-	// NOTE; strcat looks for a null terminator to replace
-	// so it won't work on an uninitialised char buffer
 
 	memcpy(newPath, currentUser.home, homeLen);
 	memcpy(newPath + homeLen, path + 1, pathLen - 1);
