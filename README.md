@@ -8,19 +8,21 @@
     - [x] Parse arguments
     - [ ] fork()/exec() calls to run program
 - [/] Built-ins
-    - [x] Implemented via function pointers?
-    - [x] cd
     - [/] ls
         - [ ] Print directories first, then files, in sorted order
-        - [ ] Colour directories & symlinks differently
+        - [/] Colour directories & symlinks differently
         - [ ] `-a` flag; should work in any order
-    - [ ] rm
+    - [/] mkdir
+        - [ ] `-p` flag
     - [/] help
         - [ ] Help messages for all other builtins
         - [ ] Better formatting; bold builtin names, coloured heading, etc
-    - [ ] exit
-    - [ ] clear
-    - [ ] whoami
+    - [/] rm
+    - [x] exit
+    - [x] clear
+    - [x] whoami
+    - [x] cd
+    - [x] Function Pointer Array
 - [ ] Pipes - `|`
 - [ ] Conditionals - `&&`, `||`
 - [ ] File redirection (output) - `>>`, `>`
