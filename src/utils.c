@@ -8,6 +8,28 @@
 
 #include "../include/utils.h"
 
+extern struct USER_INFO currentUser;
+
+char *expand_tilde(char *path) {
+	if (path == NULL || path[0] != '~')
+        return path;
+
+    char *home = currentUser.home;
+    size_t homeLen = strlen(home);
+    size_t pathLen = strlen(path);
+	char *newPath = realloc(path, homeLen + (pathLen - 1) + 1);
+
+    if (newPath == NULL) {
+        perror("expand_tilde malloc()");
+        return NULL;
+    }
+
+	memmove(newPath + homeLen, newPath + 1, pathLen);
+	memcpy(newPath, home, homeLen);
+
+    return newPath;
+}
+
 char *get_pwd() {
 	long int path_max;
 	size_t size;
