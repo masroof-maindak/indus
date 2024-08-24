@@ -11,7 +11,7 @@ struct USER_INFO {
 
 char *get_pwd();
 char *copy_string(char *str);
-char *expand_tilda(char *dir);
+char *expand_tilde(char *dir);
 char **parse_input(char *input);
 void init_user_info(struct USER_INFO *);
 

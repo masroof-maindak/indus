@@ -14,8 +14,8 @@ int execute(char **args) {
 		return 0;
 
 	for (int i = 0; i < num_builtins(); i++)
-		if (!strcmp(args[0], builtins_str[i]))
-			return builtins_fn[i](args);
+		if (!strcmp(args[0], builtinsStr[i]))
+			return builtinsFnc[i](args);
 
 	// TODO: fork() & exec()
 

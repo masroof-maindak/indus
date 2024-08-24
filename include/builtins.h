@@ -3,8 +3,8 @@
 
 int num_builtins();
 
-extern char *builtins_str[];
-extern int (*builtins_fn[])(char **args);
+extern char *builtinsStr[];
+extern int (*builtinsFnc[])(char **args);
 
 int indus_ls(char **args);
 int indus_cd(char **args);

@@ -14,13 +14,13 @@
 
 extern struct USER_INFO currentUser;
 
-char *builtins_str[]		  = {"cd",	 "ls",	  "trash", "pwd",	"help",
-								 "exit", "mkdir", "clear", "whoami"};
-int (*builtins_fn[])(char **) = {indus_cd,	  indus_ls,	   indus_pwd,
+char *builtinsStr[]			  = {"cd",	  "ls",	   "pwd",	"help",	 "exit",
+								 "mkdir", "clear", "trash", "whoami"};
+int (*builtinsFnc[])(char **) = {indus_cd,	  indus_ls,	   indus_pwd,
 								 indus_help,  indus_exit,  indus_mkdir,
 								 indus_clear, indus_trash, indus_whoami};
 
-int num_builtins() { return sizeof(builtins_str) / sizeof(builtins_str[0]); }
+int num_builtins() { return sizeof(builtinsStr) / sizeof(builtinsStr[0]); }
 
 /* FIXME: Conditional jump or move depends on uninitialised value(s) */
 int indus_ls(char **args) {
@@ -29,16 +29,14 @@ int indus_ls(char **args) {
 	char *dir;
 	DIR *d;
 	struct dirent *entry;
-	struct stat entry_stat;
+	struct stat entryStat;
 
 	if (args[1] == NULL) {
 		dir = get_pwd();
-
 		if (dir == NULL) {
 			perror("get_pwd()");
 			return 1;
 		}
-
 	} else {
 		dir		 = args[1];
 		argGiven = true;
@@ -50,39 +48,39 @@ int indus_ls(char **args) {
 		return 1;
 	}
 
-	char **dirs		  = NULL;
-	char **files	  = NULL;
-	size_t dir_count  = 0;
-	size_t file_count = 0;
+	char **dirs	 = NULL;
+	char **files = NULL;
+	int dCount	 = 0;
+	int fCount	 = 0;
 
 	while ((entry = readdir(d)) != NULL) {
 		char path[1024];
 		snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
 
-		if (stat(path, &entry_stat) == -1) {
+		if (stat(path, &entryStat) == -1) {
 			perror("stat()");
-			continue;
+			return 1;
 		}
 
-		if (S_ISDIR(entry_stat.st_mode)) {
-			dirs			= realloc(dirs, sizeof(char *) * (dir_count + 1));
-			dirs[dir_count] = strdup(entry->d_name);
-			dir_count++;
+		if (S_ISDIR(entryStat.st_mode)) {
+			dirs		 = realloc(dirs, sizeof(char *) * (dCount + 1));
+			dirs[dCount] = strdup(entry->d_name);
+			dCount++;
 		} else {
-			files = realloc(files, sizeof(char *) * (file_count + 1));
-			files[file_count] = strdup(entry->d_name);
-			file_count++;
+			files		  = realloc(files, sizeof(char *) * (fCount + 1));
+			files[fCount] = strdup(entry->d_name);
+			fCount++;
 		}
 	}
 
-	for (size_t i = 0; i < dir_count; i++) {
+	for (int i = 0; i < dCount; i++) {
 		printf("\033[1;34m%s\033[0m\n", dirs[i]);
 		free(dirs[i]);
 	}
 
 	free(dirs);
 
-	for (size_t i = 0; i < file_count; i++) {
+	for (int i = 0; i < fCount; i++) {
 		printf("%s\n", files[i]);
 		free(files[i]);
 	}
@@ -137,35 +135,34 @@ int indus_trash(char **args) {
 	}
 
 	char *path = expand_tilde(args[1]);
-	char trash_dir[1024];
-	char trash_file_path[1024];
+	char trashDir[1024];
+	char trashFilePath[1024];
 
-	snprintf(trash_dir, sizeof(trash_dir), "%s/.trash", currentUser.home);
+	snprintf(trashDir, sizeof(trashDir), "%s/.trash", currentUser.home);
 
 	struct stat st = {0};
-	if (stat(trash_dir, &st) == -1) {
-		if (mkdir(trash_dir, 0700) != 0) {
+	if (stat(trashDir, &st) == -1) {
+		if (mkdir(trashDir, 0755) != 0) {
 			perror("mkdir ~/.trash error");
 			return 1;
 		}
 	}
 
-	snprintf(trash_file_path, sizeof(trash_file_path), "%s/%s", trash_dir,
-			 path);
+	snprintf(trashFilePath, sizeof(trashFilePath), "%s/%s", trashDir, path);
 
-	if (rename(path, trash_file_path) != 0) {
+	if (rename(path, trashFilePath) != 0) {
 		switch (errno) {
 		case ENOENT:
 			fprintf(stderr,
-					"rm: cannot remove '%s': No such file or directory\n",
+					"trash: cannot remove '%s': No such file or directory\n",
 					path);
 			break;
 		case EACCES:
-			fprintf(stderr, "rm: cannot remove '%s': Permission denied\n",
+			fprintf(stderr, "trash: cannot remove '%s': Permission denied\n",
 					path);
 			break;
 		default:
-			perror("rm error");
+			perror("indus_trash()");
 			break;
 		}
 		return 1;
@@ -179,7 +176,7 @@ int indus_help(char **args) {
 	if (args[1] == NULL) {
 		printf("Available commands:\n");
 		for (int i = 0; i < num_builtins(); i++)
-			printf("  %s\n", builtins_str[i]);
+			printf("  %s\n", builtinsStr[i]);
 	} else {
 	}
 
@@ -188,12 +185,12 @@ int indus_help(char **args) {
 
 // CHECK: exit some other way...?
 int indus_exit(char **args) {
-	int exit_status = 0;
+	int status = 0;
 
 	if (args[1] != NULL)
-		exit_status = atoi(args[1]);
+		status = atoi(args[1]);
 
-	exit(exit_status);
+	exit(status);
 }
 
 int indus_mkdir(char **args) {
