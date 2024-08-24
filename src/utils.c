@@ -13,22 +13,25 @@ extern struct USER_INFO currentUser;
 /* CHECK: Valgrind Errors */
 char *expand_tilde(char *path) {
 	if (path == NULL || path[0] != '~')
-        return path;
+		return copy_string(path);
 
-    char *home = currentUser.home;
-    size_t homeLen = strlen(home);
-    size_t pathLen = strlen(path);
-	char *newPath = realloc(path, homeLen + (pathLen - 1) + 1);
+	size_t homeLen = strlen(currentUser.home);
+	size_t pathLen = strlen(path);
+	char *newPath  = malloc(sizeof(char) * (homeLen + pathLen));
 
-    if (newPath == NULL) {
-        perror("expand_tilde malloc()");
-        return NULL;
-    }
+	if (newPath == NULL) {
+		perror("malloc()");
+		return copy_string(path);
+	}
 
-	memmove(newPath + homeLen, newPath + 1, pathLen);
-	memcpy(newPath, home, homeLen);
+	// NOTE; strcat looks for a null terminator to replace
+	// so it won't work on an uninitialised char buffer
 
-    return newPath;
+	memcpy(newPath, currentUser.home, homeLen);
+	memcpy(newPath + homeLen, path + 1, pathLen - 1);
+	newPath[homeLen + pathLen - 1] = '\0';
+
+	return newPath;
 }
 
 char *get_pwd() {
@@ -67,33 +70,31 @@ char *copy_string(char *str) {
 		return NULL;
 	}
 
-	char *copy = malloc(strlen(str) + 1);
+	size_t size = strlen(str);
+	char *copy = malloc(size + 1);
 	if (copy == NULL) {
 		perror("copy_string malloc() error");
 		return NULL;
 	}
 
-	strcpy(copy, str);
+	memcpy(copy, str, size);
+	copy[size] = '\0';
 	return copy;
 }
 
 void init_user_info(struct USER_INFO *curr_user) {
-	setpwent();
+	struct passwd *pws;
+	pws = getpwuid(getuid());
 
-	struct passwd *entry;
-	entry = getpwuid(getuid());
-
-	if (entry) {
-		curr_user->uid	= entry->pw_uid;
-		curr_user->name = entry->pw_name;
-		curr_user->home = entry->pw_dir;
+	if (pws) {
+		curr_user->uid	= pws->pw_uid;
+		curr_user->name = pws->pw_name;
+		curr_user->home = pws->pw_dir;
 	} else {
 		curr_user->uid	= -1;
 		curr_user->name = "ERROR_USER";
 		curr_user->home = "/";
 	}
-
-	endpwent();
 }
 
 char **parse_input(char *input) {
