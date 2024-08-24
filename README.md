@@ -9,7 +9,7 @@
     - [ ] fork()/exec() calls to run program
 - [/] Built-ins
     - [/] ls
-        - [ ] Print directories first, then files, in sorted order
+        - [x] Print directories first, then files, in sorted order
         - [/] Colour directories & symlinks differently
         - [ ] `-a` flag; should work in any order
     - [/] mkdir
@@ -17,8 +17,9 @@
     - [/] help
         - [ ] Help messages for all other builtins
         - [ ] Better formatting; bold builtin names, coloured heading, etc
-    - [/] rm
+    - [/] trash
     - [x] exit
+    - [x] pwd
     - [x] clear
     - [x] whoami
     - [x] cd
