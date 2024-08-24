@@ -11,12 +11,16 @@
     - [x] Implemented via function pointers?
     - [x] cd
     - [/] ls
-    - [/] rm
+        - [ ] Print directories first, then files, in sorted order
+        - [ ] Colour directories & symlinks differently
+        - [ ] `-a` flag; should work in any order
+    - [ ] rm
     - [/] help
+        - [ ] Help messages for all other builtins
+        - [ ] Better formatting; bold builtin names, coloured heading, etc
     - [ ] exit
     - [ ] clear
     - [ ] whoami
-    - [ ] flag parsing
 - [ ] Pipes - `|`
 - [ ] Conditionals - `&&`, `||`
 - [ ] File redirection (output) - `>>`, `>`
