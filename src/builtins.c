@@ -9,6 +9,7 @@
 
 #include "../include/builtins.h"
 #include "../include/utils.h"
+#include <linux/stat.h>
 
 extern struct USER_INFO currentUser;
 
@@ -23,6 +24,7 @@ int indus_ls(char **args) {
 	char *dir;
 	DIR *d;
 	struct dirent *entry;
+	struct stat entry_stat; 
 
 	if (args[1] == NULL) {
 		dir = get_pwd();
@@ -41,8 +43,20 @@ int indus_ls(char **args) {
 	}
 
 	while ((entry = readdir(d)) != NULL) {
-		// TODO: bold/coloured for directories
-		printf("%s\n", entry->d_name);
+
+		char path[1024];
+		snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
+
+		if (stat(path, &entry_stat) == -1) {
+			perror("stat()");
+			continue;
+		}
+
+		if (S_ISDIR(entry_stat.st_mode)) {
+			printf("\033[1;34m%s\033[0m\n", entry->d_name);
+		} else {
+			printf("%s\n", entry->d_name);
+		}
 	}
 
 	if (closedir(d) == -1) {
