@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -Iinclude
+CFLAGS = -Wall -Wextra -pedantic
+RELEASE_FLAGS = -march=native -O3
 DEBUG_FLAGS = -g -O0
 LDFLAGS = -lreadline
 SRCS = $(wildcard src/*.c)
@@ -8,6 +9,7 @@ TARGET = indus
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 
+all: CFLAGS += $(RELEASE_FLAGS)
 all: $(TARGET)
 
 debug: CFLAGS += $(DEBUG_FLAGS)
@@ -30,4 +32,3 @@ uninstall:
 	rm -f $(BINDIR)/$(TARGET)
 
 .PHONY: all clean install uninstall
-
