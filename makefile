@@ -1,8 +1,8 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -I.
+CFLAGS = -Wall -Wextra -pedantic -Iinclude
 DEBUG_FLAGS = -g -O0
 LDFLAGS = -lreadline
-SRCS = src/*
+SRCS = $(wildcard src/*.c)
 OBJS = $(SRCS:.c=.o)
 TARGET = indus
 PREFIX = /usr/local
@@ -16,7 +16,7 @@ debug: clean $(TARGET)
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-%.o: %.c
+src/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
@@ -30,3 +30,4 @@ uninstall:
 	rm -f $(BINDIR)/$(TARGET)
 
 .PHONY: all clean install uninstall
+
