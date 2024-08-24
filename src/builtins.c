@@ -20,52 +20,101 @@ int (*builtins_fn[])(char **) = {indus_cd, indus_ls, indus_rm, indus_help,
 int num_builtins() { return sizeof(builtins_str) / sizeof(builtins_str[0]); }
 
 int indus_ls(char **args) {
+    char *dir;
+    DIR *d;
+    struct dirent *entry;
+    struct stat entry_stat; 
 
-	char *dir;
-	DIR *d;
-	struct dirent *entry;
-	struct stat entry_stat; 
+    if (args[1] == NULL)
+        dir = get_pwd();
+    else
+        dir = args[1];
 
-	if (args[1] == NULL) {
-		dir = get_pwd();
-		if (dir == NULL) {
-			perror("get_pwd()");
-			return 1;
-		}
-	} else {
-		dir = args[1];
-	}
+    if (dir == NULL) {
+        perror("get_pwd()");
+        return 1;
+    }
 
-	d = opendir(dir);
-	if (d == NULL) {
-		perror("opendir()");
-		return 1;
-	}
+    d = opendir(dir);
+    if (d == NULL) {
+        perror("opendir()");
+        return 1;
+    }
 
-	while ((entry = readdir(d)) != NULL) {
+    char **directories = NULL;
+    char **files = NULL;
+    size_t dir_count = 0;
+    size_t file_count = 0;
 
-		char path[1024];
-		snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
+    while ((entry = readdir(d)) != NULL) {
+        char path[1024];
+        snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
 
-		if (stat(path, &entry_stat) == -1) {
-			perror("stat()");
-			continue;
-		}
+        if (stat(path, &entry_stat) == -1) {
+            perror("stat()");
+            continue;
+        }
 
-		if (S_ISDIR(entry_stat.st_mode)) {
-			printf("\033[1;34m%s\033[0m\n", entry->d_name);
-		} else {
-			printf("%s\n", entry->d_name);
-		}
-	}
+        if (S_ISDIR(entry_stat.st_mode)) {
+            directories = realloc(directories, sizeof(char *) * (dir_count + 1));
+            directories[dir_count] = strdup(entry->d_name);
+            dir_count++;
+        } else {
+            files = realloc(files, sizeof(char *) * (file_count + 1));
+            files[file_count] = strdup(entry->d_name);
+            file_count++;
+        }
+    }
 
-	if (closedir(d) == -1) {
-		perror("closedir()");
-		return 1;
-	}
+    for (size_t i = 0; i < dir_count; i++) {
+        printf("\033[1;34m%s\033[0m\n", directories[i]);
+        free(directories[i]);
+    }
+    free(directories);
 
-	return 0;
+    for (size_t i = 0; i < file_count; i++) {
+        printf("%s\n", files[i]);
+        free(files[i]);
+    }
+    free(files);
+
+    if (closedir(d) == -1) {
+        perror("closedir()");
+        return 1;
+    }
+
+    return 0;
 }
+
+int indus_cd(char **args) {
+    char *dir;
+
+    if (args[1] == NULL)
+        dir = currentUser.home;
+    else
+        dir = args[1];
+
+    if (chdir(dir) != 0) {
+        switch (errno) {
+        case ENOENT:
+            fputs("No such directory\n", stderr);
+            break;
+        case ENOTDIR:
+            fputs("Not a directory\n", stderr);
+            break;
+        case EACCES:
+            fputs("Permission denied\n", stderr);
+            break;
+        default:
+            perror("chdir()");
+            break;
+        }
+        return 1;
+    }
+
+    return 0;
+}
+
 
 int indus_cd(char **args) {
 	char *dir;
