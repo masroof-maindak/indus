@@ -105,7 +105,7 @@ int indus_cd(char **args) {
 	if (args[1] == NULL)
 		dir = currentUser.home;
 	else
-		dir = expand_tilda(args[1]);
+		dir = expand_tilde(args[1]);
 
 	if (chdir(dir) != 0) {
 		switch (errno) {
@@ -135,7 +135,7 @@ int indus_trash(char **args) {
 		return 1;
 	}
 
-	char *path = expand_tilda(args[1]);
+	char *path = expand_tilde(args[1]);
 	char trash_dir[1024];
 	char trash_file_path[1024];
 
@@ -200,7 +200,7 @@ int indus_mkdir(char **args) {
 		return 1;
 	}
 
-	char *dir = expand_tilda(args[1]);
+	char *dir = expand_tilde(args[1]);
 
 	if (mkdir(dir, 0700) != 0) {
 		perror("mkdir()");
