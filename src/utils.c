@@ -1,11 +1,42 @@
-#include "utils.h"
-
+#include <errno.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include "../include/utils.h"
+
+char *get_pwd() {
+	long int path_max;
+	size_t size;
+	char *buf;
+	char *ptr;
+
+	path_max = pathconf(".", _PC_PATH_MAX);
+	if (path_max == -1)
+		size = 1024;
+	else if (path_max > 10240)
+		size = 10240;
+	else
+		size = path_max;
+
+	for (buf = ptr = NULL; ptr == NULL; size *= 2) {
+		if ((buf = realloc(buf, size)) == NULL) {
+			perror("realloc()");
+			return NULL;
+		}
+
+		ptr = getcwd(buf, size);
+		if (ptr == NULL && errno != ERANGE) {
+			perror("getcwd()");
+			return NULL;
+		}
+	}
+
+	return ptr;
+}
 
 char *copy_string(char *str) {
 	if (str == NULL) {
@@ -23,15 +54,23 @@ char *copy_string(char *str) {
 	return copy;
 }
 
-char *get_username() {
+void init_user_info(struct USER_INFO *curr_user) {
 	setpwent();
-	struct passwd *pw = getpwuid(geteuid());
+
+	struct passwd *entry;
+	entry = getpwuid(getuid());
+
+	if (entry) {
+		curr_user->uid	= entry->pw_uid;
+		curr_user->name = entry->pw_name;
+		curr_user->home = entry->pw_dir;
+	} else {
+		curr_user->uid	= -1;
+		curr_user->name = "ERROR_USER";
+		curr_user->home = "/";
+	}
+
 	endpwent();
-
-	if (pw)
-		return pw->pw_name;
-
-	return NULL;
 }
 
 char **parse_input(char *input) {

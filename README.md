@@ -9,15 +9,17 @@
     - [ ] fork()/exec() calls to run program
 - [/] Built-ins
     - [x] Implemented via function pointers?
-    - [ ] cd
-    - [ ] ls
-    - [ ] rm
-    - [ ] help
+    - [x] cd
+    - [/] ls
+    - [/] rm
+    - [/] help
     - [ ] exit
-- [ ] Abbreviations like Fish
-- [ ] File redirection (output) - `>>`, `>`
+    - [ ] clear
+    - [ ] whoami
+    - [ ] flag parsing
 - [ ] Pipes - `|`
 - [ ] Conditionals - `&&`, `||`
+- [ ] File redirection (output) - `>>`, `>`
 - [ ] Asynchronous execution - `&`
 - [ ] autocompletion -> Edit Distance algo (Levenshtein/Jaro Wrinkler)
-
+- [-] Abbreviations like Fish
