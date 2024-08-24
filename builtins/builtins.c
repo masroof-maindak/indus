@@ -51,7 +51,7 @@ int indus_ls(char **args) {
         }
     }
 
-    // Close directory
+    // Close the directory stream
     if (closedir(d) == -1) {
         perror("closedir() error");
         return 1;
@@ -63,12 +63,14 @@ int indus_ls(char **args) {
 int indus_cd(char **args) {
 	char* dir;
 	if (args[1] == NULL) {
-		// CD to home
-		struct passwd *pw =getpwuid(getuid());
-		if (pw==NULL){
-			fprintf(stderr, "Error: Failed to get home directory.\n");
-			return 1;
-		}
+
+		dir = getenv("currentUser.home");
+        if (dir == NULL) {
+           struct passwd *pw = getpwuid(getuid());
+            if (pw == NULL) {
+            perror("getpwuid() error");
+            return 1;
+        }
 		dir = pw->pw_dir;
 	}
 	else {
@@ -77,6 +79,7 @@ int indus_cd(char **args) {
 
 	//change to dir
 	if (chdir(dir) != 0) {
+        perror("chdir() error");
 	   //determine specific error 
 	  if (errno == ENOENT) {
             fprintf(stderr, "cd: %s: No such file or directory\n", dir);
@@ -89,6 +92,7 @@ int indus_cd(char **args) {
         }
         return 1;
     }
+
 	return 0;
 }
 
