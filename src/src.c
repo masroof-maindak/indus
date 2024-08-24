@@ -3,9 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "builtins/builtins.h"
-#include "prompt/prompt.h"
-#include "utils/utils.h"
+#include "../include/builtins.h"
+#include "../include/prompt.h"
+#include "../include/utils.h"
 
 struct USER_INFO currentUser;
 

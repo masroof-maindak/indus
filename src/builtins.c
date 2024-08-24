@@ -1,6 +1,3 @@
-#include "builtins.h"
-#include "../utils/utils.h"
-
 #include <dirent.h>
 #include <errno.h>
 #include <pwd.h>
@@ -8,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include "../include/builtins.h"
+#include "../include/utils.h"
 
 extern struct USER_INFO currentUser;
 
@@ -99,7 +99,6 @@ int indus_help(char **args) {
 		for (int i = 0; i < num_builtins(); i++)
 			printf("  %s\n", builtins_str[i]);
 	} else {
-
 	}
 
 	return 0;

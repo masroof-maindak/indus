@@ -1,5 +1,3 @@
-#include "utils.h"
-
 #include <errno.h>
 #include <pwd.h>
 #include <stdio.h>
@@ -7,6 +5,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include "../include/utils.h"
 
 char *get_pwd() {
 	long int path_max;

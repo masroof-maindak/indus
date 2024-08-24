@@ -1,6 +1,3 @@
-#include "prompt.h"
-#include "../utils/utils.h"
-
 #include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +5,9 @@
 #include <unistd.h>
 
 #include <readline/readline.h>
+
+#include "../include/prompt.h"
+#include "../include/utils.h"
 
 extern struct USER_INFO currentUser;
 
