@@ -13,12 +13,13 @@
         - [/] Colour directories & symlinks differently
         - [ ] `-a` flag; should work in any order
     - [/] mkdir
-        - [ ] `-p` flag
+        - [ ] Implied `-p` flag
     - [/] help
+        - [x] Display builtins
         - [ ] Help messages for all other builtins
         - [ ] Better formatting; bold builtin names, coloured heading, etc
     - [/] trash
-    - [x] exit
+    - [/] exit
     - [x] pwd
     - [x] clear
     - [x] whoami

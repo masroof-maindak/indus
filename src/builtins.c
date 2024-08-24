@@ -22,6 +22,7 @@ int (*builtins_fn[])(char **) = {indus_cd,	  indus_ls,	   indus_pwd,
 
 int num_builtins() { return sizeof(builtins_str) / sizeof(builtins_str[0]); }
 
+/* FIXME: Conditional jump or move depends on uninitialised value(s) */
 int indus_ls(char **args) {
 
 	bool argGiven;
@@ -128,7 +129,7 @@ int indus_cd(char **args) {
 	return 0;
 }
 
-/* CHECK */
+/* CHECK: doesn't work on ~/abc? */
 int indus_trash(char **args) {
 	if (args[1] == NULL) {
 		fputs("See `help trash` for usage information\n", stderr);
@@ -185,6 +186,7 @@ int indus_help(char **args) {
 	return 0;
 }
 
+// CHECK: exit some other way...?
 int indus_exit(char **args) {
 	int exit_status = 0;
 

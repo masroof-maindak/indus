@@ -10,6 +10,7 @@
 
 extern struct USER_INFO currentUser;
 
+/* CHECK: Valgrind Errors */
 char *expand_tilde(char *path) {
 	if (path == NULL || path[0] != '~')
         return path;
