@@ -102,7 +102,7 @@ int indus_cd(char **args) {
 	char *dir;
 
 	if (args[1] == NULL)
-		dir = currentUser.home;
+		dir = copy_string(currentUser.home);
 	else
 		dir = expand_tilde(args[1]);
 
@@ -124,6 +124,7 @@ int indus_cd(char **args) {
 		return 1;
 	}
 
+	free(dir);
 	return 0;
 }
 
@@ -169,6 +170,7 @@ int indus_trash(char **args) {
 	}
 
 	printf("Moved '%s' to trash\n", path);
+	free(path);
 	return 0;
 }
 
@@ -201,11 +203,15 @@ int indus_mkdir(char **args) {
 
 	char *dir = expand_tilde(args[1]);
 
-	if (mkdir(dir, 0700) != 0) {
-		perror("mkdir()");
+	if (mkdir(dir, 0755) != 0) {
+		if (errno == EACCES)
+			fputs("Permission denied\n", stderr);
+		else
+			perror("mkdir()");
 		return 1;
 	}
 
+	free(dir);
 	return 0;
 }
 
