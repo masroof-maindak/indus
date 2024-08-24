@@ -5,15 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "../include/builtins.h"
 #include "../include/utils.h"
 
 extern struct USER_INFO currentUser;
 
-char *builtins_str[]		  = {"cd", "ls", "rm", "help", "exit"};
+char *builtins_str[]		  = {"cd", "ls", "rm", "help", "exit", "mkdir", "clear", "whoami"};
 int (*builtins_fn[])(char **) = {indus_cd, indus_ls, indus_rm, indus_help,
-								 indus_exit};
+								 indus_exit, indus_mkdir, indus_clear, indus_whoami};
 
 int num_builtins() { return sizeof(builtins_str) / sizeof(builtins_str[0]); }
 
@@ -87,9 +88,39 @@ int indus_rm(char **args) {
 		return 1;
 	}
 
-	// Move the file being deleted to ~/.trash
+	char *file_name = args[1];
+    char trash_dir[1024];
+    char trash_file_path[1024];
 
-	return 0;
+    snprintf(trash_dir, sizeof(trash_dir), "%s/.trash", currentUser.home);
+
+    struct stat st = {0};
+    if (stat(trash_dir, &st) == -1) {
+        if (mkdir(trash_dir, 0700) != 0) {
+            perror("mkdir ~/.trash error");
+            return 1;
+        }
+    }
+
+    snprintf(trash_file_path, sizeof(trash_file_path), "%s/%s", trash_dir, file_name);
+
+    if (rename(file_name, trash_file_path) != 0) {
+        switch (errno) {
+        case ENOENT:
+            fprintf(stderr, "rm: cannot remove '%s': No such file or directory\n", file_name);
+            break;
+        case EACCES:
+            fprintf(stderr, "rm: cannot remove '%s': Permission denied\n", file_name);
+            break;
+        default:
+            perror("rm error");
+            break;
+        }
+        return 1;
+    }
+
+    printf("Moved '%s' to trash\n", file_name);
+    return 0;
 }
 
 int indus_help(char **args) {
@@ -104,4 +135,39 @@ int indus_help(char **args) {
 	return 0;
 }
 
-int indus_exit(char **args) { return 0; }
+int indus_exit(char **args) { 
+	int exit_status = 0;
+
+	if (args[1] != NULL) {
+		exit_status = atoi(args[1]);
+	}
+
+	exit(exit_status);
+ }
+
+ int indus_mkdir(char **args) {
+	if (args[1] == NULL) {
+		fputs("See `help mkdir` for usage information\n", stderr);
+		return 1;
+	}
+
+	if (mkdir(args[1], 0700) != 0) {
+		perror("mkdir()");
+		return 1;
+	}
+
+	return 0;
+}
+
+int indus_clear(char **args) {
+
+    printf("\033[H\033[J");
+    return 0;
+}
+
+ int indus_whoami(char **args) {
+	 printf("%s\n", currentUser.name);
+	 return 0;
+ }
+
+ 
