@@ -9,11 +9,14 @@
     - [ ] fork()/exec() calls to run program
 - [/] Built-ins
     - [x] Implemented via function pointers?
-    - [ ] cd
-    - [ ] ls
-    - [ ] rm
-    - [ ] help
+    - [x] cd
+    - [/] ls
+    - [/] rm
+    - [/] help
     - [ ] exit
+    - [ ] clear
+    - [ ] whoami
+    - [ ] flag parsing
 - [ ] Pipes - `|`
 - [ ] Conditionals - `&&`, `||`
 - [ ] File redirection (output) - `>>`, `>`

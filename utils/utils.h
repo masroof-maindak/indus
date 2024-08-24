@@ -9,6 +9,7 @@ struct USER_INFO {
 	char *home;
 };
 
+char *get_pwd();
 char **parse_input(char *input);
 char *copy_string(char *str);
 void init_user_info(struct USER_INFO *);
