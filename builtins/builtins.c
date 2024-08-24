@@ -62,35 +62,27 @@ int indus_ls(char **args) {
 }
 
 int	indus_cd(char **args) {
-	char*	dir;
+	char* dir;
 
-	if (args[1] == NULL) {
-
-		dir = getenv("currentUser.home");
-		if (dir == NULL) {
-			struct passwd *pw = getpwuid(getuid());
-			if (pw == NULL) {
-				perror("getpwuid() error");
-				return 1;
-			}
-			dir = pw->pw_dir;
-		}
-	} else {
+	if (args[1] == NULL)
+		dir = currentUser.home;
+	else
 		dir = args[1];
-	}
 
-	// change to dir
 	if (chdir(dir) != 0) {
-		perror("chdir() error");
-		// determine specific error
-		if (errno == ENOENT) {
-			fprintf(stderr, "cd: %s: No such file or directory\n", dir);
-		} else if (errno == ENOTDIR) {
-			fprintf(stderr, "cd: %s: Not a directory\n", dir);
-		} else if (errno == EACCES) {
-			fprintf(stderr, "cd: %s: Permission denied\n", dir);
-		} else {
-			fprintf(stderr, "cd: Error occurred while changing directory to %s\n", dir);
+		switch (errno) {
+			case ENOENT:
+				fprintf(stderr, "cd: %s: No such file or directory\n", dir);
+				break;
+			case ENOTDIR:
+				fprintf(stderr, "cd: %s: Not a directory\n", dir);
+				break;
+			case EACCES:
+				fprintf(stderr, "cd: %s: Permission denied\n", dir);
+				break;
+			default:
+				fprintf(stderr, "cd: Error occurred while changing directory to %s\n", dir);
+				break;
 		}
 		return 1;
 	}
