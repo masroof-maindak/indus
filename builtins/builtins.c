@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "builtins.h"
+extern struct USER_INFO currentUser;
 
 char *builtins_str[]		  = {"cd", "ls", "rm", "help", "exit"};
 int (*builtins_fn[])(char **) = {indus_cd, indus_ls, indus_rm, indus_help,
@@ -60,38 +61,39 @@ int indus_ls(char **args) {
 	return 0;
 }
 
-int indus_cd(char **args) {
-	char* dir;
+int	indus_cd(char **args) {
+	char*	dir;
+
 	if (args[1] == NULL) {
 
 		dir = getenv("currentUser.home");
-        if (dir == NULL) {
-           struct passwd *pw = getpwuid(getuid());
-            if (pw == NULL) {
-            perror("getpwuid() error");
-            return 1;
-        }
-		dir = pw->pw_dir;
-	}
-	else {
+		if (dir == NULL) {
+			struct passwd *pw = getpwuid(getuid());
+			if (pw == NULL) {
+				perror("getpwuid() error");
+				return 1;
+			}
+			dir = pw->pw_dir;
+		}
+	} else {
 		dir = args[1];
 	}
 
-	//change to dir
+	// change to dir
 	if (chdir(dir) != 0) {
-        perror("chdir() error");
-	   //determine specific error 
-	  if (errno == ENOENT) {
-            fprintf(stderr, "cd: %s: No such file or directory\n", dir);
-        } else if (errno == ENOTDIR) {
-            fprintf(stderr, "cd: %s: Not a directory\n", dir);
-        } else if (errno == EACCES) {
-            fprintf(stderr, "cd: %s: Permission denied\n", dir);
-        } else {
-            fprintf(stderr, "cd: Error occurred while changing directory to %s\n", dir);
-        }
-        return 1;
-    }
+		perror("chdir() error");
+		// determine specific error
+		if (errno == ENOENT) {
+			fprintf(stderr, "cd: %s: No such file or directory\n", dir);
+		} else if (errno == ENOTDIR) {
+			fprintf(stderr, "cd: %s: Not a directory\n", dir);
+		} else if (errno == EACCES) {
+			fprintf(stderr, "cd: %s: Permission denied\n", dir);
+		} else {
+			fprintf(stderr, "cd: Error occurred while changing directory to %s\n", dir);
+		}
+		return 1;
+	}
 
 	return 0;
 }
