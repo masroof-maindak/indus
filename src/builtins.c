@@ -11,6 +11,10 @@
 #include "../include/bool.h"
 #include "../include/builtins.h"
 #include "../include/utils.h"
+#include "../include/prompt.h"
+
+#define INITIAL_SIZE 10
+#define SCALE_FACTOR 2
 
 extern struct USER_INFO currentUser;
 
@@ -23,6 +27,11 @@ int (*builtinsFnc[])(char **) = {indus_cd,	  indus_ls,	   indus_pwd,
 int num_builtins() { return sizeof(builtinsStr) / sizeof(builtinsStr[0]); }
 
 /* FIXME: Conditional jump or move depends on uninitialised value(s) */
+
+int compare_strings(const void *a, const void *b) {
+    return strcmp(*(const char **)a, *(const char **)b);
+}
+
 int indus_ls(char **args) {
 
 	bool argGiven;
@@ -48,44 +57,99 @@ int indus_ls(char **args) {
 		return 1;
 	}
 
-	char **dirs	 = NULL;
-	char **files = NULL;
-	int dCount	 = 0;
-	int fCount	 = 0;
+	int dAlloc = INITIAL_SIZE, fAlloc = INITIAL_SIZE, sAlloc = INITIAL_SIZE;
+    int dCount = 0, fCount = 0, sCount = 0;
+
+    char **dirs = malloc(dAlloc * sizeof(char *));
+    char **files = malloc(fAlloc * sizeof(char *));
+    char **symlinks = malloc(sAlloc * sizeof(char *));
+
+	if (!dirs || !files || !symlinks) {
+        perror("malloc()");
+        closedir(d);
+        return 1;
+    }
 
 	while ((entry = readdir(d)) != NULL) {
+		if (entry->d_name[0] == '.' && (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)) {
+            continue; 
+        }
+
 		char path[1024];
 		snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
 
-		if (stat(path, &entryStat) == -1) {
-			perror("stat()");
+		if (lstat(path, &entryStat) == -1) {
+			perror("lstat()");
 			return 1;
 		}
 
 		if (S_ISDIR(entryStat.st_mode)) {
-			dirs		 = realloc(dirs, sizeof(char *) * (dCount + 1));
-			dirs[dCount] = strdup(entry->d_name);
-			dCount++;
+			if (dCount >= dAlloc) {
+                dAlloc *= SCALE_FACTOR;
+                dirs = realloc(dirs, dAlloc * sizeof(char *));
+                if (!dirs) {
+                    perror("realloc()");
+                    closedir(d);
+                    return 1;
+                }
+			}
+			dirs[dCount++] = strdup(entry->d_name);
+		} else if (S_ISLNK(entryStat.st_mode)) {
+           if (sCount >= sAlloc) {
+                sAlloc *= SCALE_FACTOR;
+                symlinks = realloc(symlinks, sAlloc * sizeof(char *));
+                if (!symlinks) {
+                    perror("realloc()");
+                    closedir(d);
+                    return 1;
+                }
+            }
+            symlinks[sCount++] = strdup(entry->d_name);
 		} else {
-			files		  = realloc(files, sizeof(char *) * (fCount + 1));
-			files[fCount] = strdup(entry->d_name);
-			fCount++;
-		}
+			if (fCount >= fAlloc) {
+                fAlloc *= SCALE_FACTOR;
+                files = realloc(files, fAlloc * sizeof(char *));
+                if (!files) {
+                    perror("realloc()");
+                    closedir(d);
+                    return 1;
+                }
+            }
+            files[fCount++] = strdup(entry->d_name);
+        }
 	}
 
+	if (dCount > 0) {
+        qsort(dirs, dCount, sizeof(char *), compare_strings);
+    }
+    if (fCount > 0) {
+        qsort(files, fCount, sizeof(char *), compare_strings);
+    }
+	if (sCount > 0) {
+        qsort(symlinks, sCount, sizeof(char *), compare_strings);
+    }
+
 	for (int i = 0; i < dCount; i++) {
-		printf("\033[1;34m%s\033[0m\n", dirs[i]);
+		printf("%s%s%s  ", DIR_COLOR, dirs[i], RESET_COLOR);
 		free(dirs[i]);
 	}
 
 	free(dirs);
 
 	for (int i = 0; i < fCount; i++) {
-		printf("%s\n", files[i]);
+		printf("%s%s%s  ", FILE_COLOR, files[i], RESET_COLOR);
 		free(files[i]);
 	}
 
 	free(files);
+
+	for (int i = 0; i < sCount; i++) {
+        printf("%s%s%s  ", ACCENT, symlinks[i], RESET_COLOR);
+        free(symlinks[i]);
+    }
+    free(symlinks);
+
+	printf("\n");
 
 	if (!argGiven)
 		free(dir);
