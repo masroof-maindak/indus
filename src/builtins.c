@@ -192,49 +192,8 @@ int indus_cd(char **args) {
 	return 0;
 }
 
-/* CHECK: doesn't work on ~/abc? */
+/* TODO */
 int indus_trash(char **args) {
-	if (args[1] == NULL) {
-		fputs("See `help trash` for usage information\n", stderr);
-		return 1;
-	}
-
-	char *path = expand_tilde(args[1]);
-	char trashDir[1024];
-	char trashFilePath[1024];
-
-	snprintf(trashDir, sizeof(trashDir), "%s/.trash", currentUser.home);
-
-	struct stat st = {0};
-	if (stat(trashDir, &st) == -1) {
-		if (mkdir(trashDir, 0755) != 0) {
-			perror("mkdir ~/.trash error");
-			return 1;
-		}
-	}
-
-	snprintf(trashFilePath, sizeof(trashFilePath), "%s/%s", trashDir, path);
-
-	if (rename(path, trashFilePath) != 0) {
-		switch (errno) {
-		case ENOENT:
-			fprintf(stderr,
-					"trash: cannot remove '%s': No such file or directory\n",
-					path);
-			break;
-		case EACCES:
-			fprintf(stderr, "trash: cannot remove '%s': Permission denied\n",
-					path);
-			break;
-		default:
-			perror("indus_trash()");
-			break;
-		}
-		return 1;
-	}
-
-	printf("Moved '%s' to trash\n", path);
-	free(path);
 	return 0;
 }
 

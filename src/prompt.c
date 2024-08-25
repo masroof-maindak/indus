@@ -39,6 +39,7 @@ char *shorten_home_in_pwd(char *pwd) {
 
 		ret[0] = '~';
 
+		// TODO: convert to memcpy
 		if (sizeRemaining > 0)
 			strcpy(ret + 1, pwd + sizeOfHome);
 
