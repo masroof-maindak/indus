@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <linux/limits.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,12 @@
 #include "../include/utils.h"
 
 extern struct USER_INFO currentUser;
+
+#if defined(PATH_MAX) && PATH_MAX > 1000
+#define PATH_MAXL PATH_MAX
+#else
+#define PATH_MAXL 1024
+#endif
 
 char *expand_tilde(char *path) {
 	if (path == NULL || path[0] != '~')
@@ -31,20 +38,12 @@ char *expand_tilde(char *path) {
 }
 
 char *get_pwd() {
-	long int path_max;
-	size_t size;
-	char *buf;
-	char *ptr;
+	size_t size = PATH_MAXL;
+	char *buf	= NULL;
+	char *ptr	= NULL;
+	char *real	= NULL;
 
-	path_max = pathconf(".", _PC_PATH_MAX);
-	if (path_max == -1)
-		size = 1024;
-	else if (path_max > 10240)
-		size = 10240;
-	else
-		size = path_max;
-
-	for (buf = ptr = NULL; ptr == NULL; size *= 2) {
+	for (; ptr == NULL; size *= 2) {
 		if ((buf = realloc(buf, size)) == NULL) {
 			perror("realloc()");
 			return NULL;
@@ -57,7 +56,21 @@ char *get_pwd() {
 		}
 	}
 
-	return ptr;
+	for (; real == NULL; size *= 2) {
+		if ((ptr = realloc(ptr, size)) == NULL) {
+			perror("realloc()");
+			return NULL;
+		}
+
+		real = realpath(ptr, real);
+		if (real == NULL && errno != ENAMETOOLONG) {
+			perror("realpath()");
+			return ptr;
+		}
+	}
+
+	free(ptr);
+	return real;
 }
 
 char *copy_string(char *str) {
@@ -67,7 +80,7 @@ char *copy_string(char *str) {
 	}
 
 	size_t size = strlen(str);
-	char *copy = malloc(size + 1);
+	char *copy	= malloc(size + 1);
 	if (copy == NULL) {
 		perror("copy_string malloc() error");
 		return NULL;
