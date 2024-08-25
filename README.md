@@ -18,7 +18,7 @@
         - [x] Display builtins
         - [ ] Help messages for all other builtins
         - [ ] Better formatting; bold builtin names, coloured heading, etc
-    - [/] trash
+    - [ ] trash
     - [/] exit
     - [x] pwd
     - [x] clear
