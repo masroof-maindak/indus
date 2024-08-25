@@ -7,19 +7,17 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-// Constants
 #define MAX_TOKEN_LENGTH 256
 #define SUCCESS_CODE 0
 #define FAILURE_CODE 1
 
-
 typedef enum {
-    NO_OPERATOR,
-    AND_OPERATOR,
-    OR_OPERATOR,
-    PIPE_OPERATOR,
-    REDIRECT_OPERATOR_OVERWRITE,
-    REDIRECT_OPERATOR_APPEND
+    NO_OP,
+    AND,
+    OR,
+    PIPE,
+    OVERWRITE,
+    APPEND
 } Operator;
 
 typedef struct {
@@ -28,13 +26,11 @@ typedef struct {
     int capacity;
 } TokenArray;
 
-
-// Function declarations
-void init_token_array(TokenArray *token_array);
-void add_token(TokenArray *token_array, const char *token);
-void free_token_array(TokenArray *token_array);
-void tokenize_input(const char *input, TokenArray *token_array);
 int execute_command(char **tokens, int count);
-void parse_and_execute(TokenArray *token_array);
+void init_token_array(TokenArray *tokenArr);
+void add_token(TokenArray *tokenArr, const char *token);
+void free_token_array(TokenArray *tokenArr);
+void tokenize_input(const char *input, TokenArray *tokenArr);
+void parse_and_execute(TokenArray *tokenArr);
 
 #endif // PARSE_H

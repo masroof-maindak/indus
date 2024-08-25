@@ -1,170 +1,167 @@
 #include "parse.h"
-#include <stdbool.h>
+#include "../include/utils.h"
 
-void init_token_array(TokenArray *token_array) {
-	token_array->tokens	  = malloc(10 * sizeof(char *)); // Initial capacity
-	token_array->count	  = 0;
-	token_array->capacity = 10;
+void init_token_array(TokenArray *tArr) {
+	tArr->tokens   = malloc(10 * sizeof(char *));
+	tArr->count	   = 0;
+	tArr->capacity = 10;
 }
 
-void add_token(TokenArray *token_array, const char *token) {
-	if (token_array->count >= token_array->capacity) {
-		token_array->capacity *= 2;
-		token_array->tokens = realloc(token_array->tokens,
-									  token_array->capacity * sizeof(char *));
+void add_token(TokenArray *tArr, const char *token) {
+	if (tArr->count >= tArr->capacity) {
+		tArr->capacity *= 2;
+		tArr->tokens = realloc(tArr->tokens, tArr->capacity * sizeof(char *));
 	}
-	token_array->tokens[token_array->count] = strdup(token);
-	token_array->count++;
+
+	tArr->tokens[tArr->count] = strdup(token);
+	tArr->count++;
 }
 
-void free_token_array(TokenArray *token_array) {
-	for (int i = 0; i < token_array->count; i++) {
-		free(token_array->tokens[i]);
-	}
-	free(token_array->tokens);
+void free_token_array(TokenArray *tArr) {
+	for (int i = 0; i < tArr->count; i++)
+		free(tArr->tokens[i]);
+
+	free(tArr->tokens);
 }
 
-void tokenize_input(const char *input, TokenArray *token_array) {
+void tokenize_input(const char *input, TokenArray *tArr) {
 	const char *ptr = input;
 	char buffer[MAX_TOKEN_LENGTH];
-	int char_idx = 0;
+	int charIdx = 0;
 
 	while (*ptr != '\0') {
 		if (isspace(*ptr) || *ptr == '&' || *ptr == '|' || *ptr == '>') {
-			if (char_idx > 0) {
-				buffer[char_idx] = '\0';
-				add_token(token_array, buffer);
-				char_idx = 0;
+			if (charIdx > 0) {
+				buffer[charIdx] = '\0';
+				add_token(tArr, buffer);
+				charIdx = 0;
 			}
+
 			if (*ptr == '&' && *(ptr + 1) == '&') {
-				add_token(token_array, "&&");
+				add_token(tArr, "&&");
 				ptr++;
 			} else if (*ptr == '|' && *(ptr + 1) == '|') {
-				add_token(token_array, "||");
+				add_token(tArr, "||");
 				ptr++;
 			} else if (*ptr == '|') {
-				add_token(token_array, "|");
+				add_token(tArr, "|");
 			} else if (*ptr == '>') {
-				if (*(ptr + 1) != '>') {
-					add_token(token_array, ">");
-				} else {
-					add_token(token_array, ">>");
-				}
+				if (*(ptr + 1) != '>')
+					add_token(tArr, ">");
+				else
+					add_token(tArr, ">>");
 			}
 		} else {
-			buffer[char_idx] = *ptr;
-			char_idx++;
+			buffer[charIdx] = *ptr;
+			charIdx++;
 		}
 		ptr++;
 	}
 
-	if (char_idx > 0) {
-		buffer[char_idx] = '\0';
-		add_token(token_array, buffer);
+	if (charIdx > 0) {
+		buffer[charIdx] = '\0';
+		add_token(tArr, buffer);
 	}
 }
 
 int execute_command(char **tokens, int count) {
 	// Simulated command execution
 	printf("Executing command: ");
-	for (int i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++)
 		printf("%s ", tokens[i]);
-	}
 	printf("\n");
-	return SUCCESS_CODE; // Simulate success
+	return SUCCESS_CODE;
 }
 
-void print_command_tokens(const TokenArray *command_tokens) {
-	printf("Command Tokens:\n");
-	for (int i = 0; i < command_tokens->count; i++) {
-		printf("Token[%d]: %s\n", i, command_tokens->tokens[i]);
-	}
+void print_command_tokens(const TokenArray *cmdTokens) {
+	puts("Command Tokens:");
+	for (int i = 0; i < cmdTokens->count; i++)
+		printf("Token[%d]: %s\n", i, cmdTokens->tokens[i]);
 }
 
 Operator get_operator_type(const char *token) {
-    if (strcmp(token, "&&") == 0) return AND_OPERATOR;
-    if (strcmp(token, "||") == 0) return OR_OPERATOR;
-    if (strcmp(token, "|") == 0) return PIPE_OPERATOR;
-    if (strcmp(token, ">") == 0) return REDIRECT_OPERATOR_OVERWRITE;
-    if (strcmp(token, ">>") == 0) return REDIRECT_OPERATOR_APPEND;
-    return NO_OPERATOR;
+	if (strcmp(token, "&&") == 0)
+		return AND;
+	if (strcmp(token, "||") == 0)
+		return OR;
+	if (strcmp(token, "|") == 0)
+		return PIPE;
+	if (strcmp(token, ">") == 0)
+		return OVERWRITE;
+	if (strcmp(token, ">>") == 0)
+		return APPEND;
+	return NO_OP;
 }
-bool is_first_operator_redirect(TokenArray *token_array) {
-	for (int i = 0; i < token_array->count; i++) {
-		Operator op_type = get_operator_type(token_array->tokens[i]);
-		if (op_type != NO_OPERATOR) {
-			// Check if the first encountered operator is either > or >>
-			if (op_type == REDIRECT_OPERATOR_OVERWRITE ||
-				op_type == REDIRECT_OPERATOR_APPEND) {
+
+bool is_first_operator_redirect(TokenArray *tArr) {
+	for (int i = 0; i < tArr->count; i++) {
+		Operator opType = get_operator_type(tArr->tokens[i]);
+
+		if (opType != NO_OP) {
+			if (opType == OVERWRITE || opType == APPEND)
 				return true;
-			}
-			// If the first encountered operator is not a redirection operator,
-			// return false
 			return false;
 		}
 	}
-	// If no operators are found, return false
+
 	return false;
 }
 
+void parse_and_execute(TokenArray *tArr) {
+	int status		= SUCCESS_CODE;
+	int redirectIdx = -1;
+	Operator lastOp = NO_OP;
+	bool opCheck	= false;
+	bool redirCheck = is_first_operator_redirect(tArr);
 
-void parse_and_execute(TokenArray *token_array) {
-	int status_code = SUCCESS_CODE;
-	int redirect_idx = -1;
-	Operator last_operator = NO_OPERATOR;
-	bool op_check = false;
-	bool redir_check = is_first_operator_redirect(token_array);
-
-	for (int i = 0; i < token_array->count; i++) {
-		const char *token = token_array->tokens[i];
+	for (int i = 0; i < tArr->count; i++) {
+		const char *token = tArr->tokens[i];
 
 		// Check for operators
 		if (strcmp(token, "&&") == 0) {
-			last_operator = AND_OPERATOR;
-			op_check = true;
+			lastOp	= AND;
+			opCheck = true;
 		} else if (strcmp(token, "||") == 0) {
-			last_operator = OR_OPERATOR;
-			op_check = true;
+			lastOp	= OR;
+			opCheck = true;
 		} else if (strcmp(token, "|") == 0) {
-			last_operator = PIPE_OPERATOR;
-			op_check = true;
+			lastOp	= PIPE;
+			opCheck = true;
 		} else if (strcmp(token, ">") == 0) {
-			last_operator = REDIRECT_OPERATOR_OVERWRITE;
-			op_check = true;
+			lastOp	= OVERWRITE;
+			opCheck = true;
 		} else if (strcmp(token, ">>") == 0) {
-			last_operator = REDIRECT_OPERATOR_APPEND;
-			op_check = true;
+			lastOp	= APPEND;
+			opCheck = true;
 		} else {
 
 			// Collect tokens for the command
-			TokenArray command_tokens;
-			init_token_array(&command_tokens);
+			TokenArray cmdTokens;
+			init_token_array(&cmdTokens);
 			bool flag = false;
-			int idx = 0;
+			int idx	  = 0;
 
-			if (op_check) { // check if next operator is redirection
-				op_check = false;
-				if (last_operator != REDIRECT_OPERATOR_APPEND &&
-					last_operator != REDIRECT_OPERATOR_OVERWRITE) {
-					for (int k = i; k < token_array->count; k++) {
-						const char *tk = token_array->tokens[k];
+			if (opCheck) { // check if next operator is redirection
+				opCheck = false;
+				if (lastOp != APPEND && lastOp != OVERWRITE) {
+					for (int k = i; k < tArr->count; k++) {
+						const char *tk = tArr->tokens[k];
 						if (strcmp(tk, "&&") != 0 && strcmp(tk, "||") != 0 &&
 							strcmp(tk, "|") != 0) {
-							if (strcmp(tk, ">") == 0 ||
-								strcmp(tk, ">>") == 0) { // if it is then handle it
+							if (strcmp(tk, ">") == 0 || strcmp(tk, ">>") == 0) {
 								flag = true;
-								while (k < token_array->count &&
-									strcmp(token_array->tokens[k], "&&") != 0 &&
-									strcmp(token_array->tokens[k], "||") != 0 &&
-									strcmp(token_array->tokens[k], "|") != 0) {
-									add_token(&command_tokens, token_array->tokens[k]);
+								while (k < tArr->count &&
+									   strcmp(tArr->tokens[k], "&&") != 0 &&
+									   strcmp(tArr->tokens[k], "||") != 0 &&
+									   strcmp(tArr->tokens[k], "|") != 0) {
+									add_token(&cmdTokens, tArr->tokens[k]);
 									k++;
 									idx = k;
 								}
 								break;
 
 							} else {
-								add_token(&command_tokens, tk);
+								add_token(&cmdTokens, tk);
 							}
 						} else {
 							break; // if it is any other operator ls -l && cd
@@ -173,19 +170,23 @@ void parse_and_execute(TokenArray *token_array) {
 					}
 				} else { // this is the case if the very first operator in our
 						 // string is either > or >>
-					int k = i; // since i now points to one token ahead of > or >>
-					flag = true;
-					redir_check = false;
-					while (k > 0 && strcmp(token_array->tokens[k], "&&") != 0 &&
-						   strcmp(token_array->tokens[k], "||") != 0 &&
-						   strcmp(token_array->tokens[k], "|") != 0) {
+					int k	   = i; // since i == one token ahead of > or >>
+					flag	   = true;
+					redirCheck = false;
+
+					while (k > 0 && strcmp(tArr->tokens[k], "&&") != 0 &&
+						   strcmp(tArr->tokens[k], "||") != 0 &&
+						   strcmp(tArr->tokens[k], "|") != 0) {
+
 						k--; // make k point to where the command starts
 					}
-					while (k < token_array->count &&
-						   strcmp(token_array->tokens[k], "&&") != 0 &&
-						   strcmp(token_array->tokens[k], "||") != 0 &&
-						   strcmp(token_array->tokens[k], "|") != 0) {
-						add_token(&command_tokens, token_array->tokens[k]);
+
+					while (k < tArr->count &&
+						   strcmp(tArr->tokens[k], "&&") != 0 &&
+						   strcmp(tArr->tokens[k], "||") != 0 &&
+						   strcmp(tArr->tokens[k], "|") != 0) {
+
+						add_token(&cmdTokens, tArr->tokens[k]);
 						k++;
 						idx = k;
 					}
@@ -195,48 +196,46 @@ void parse_and_execute(TokenArray *token_array) {
 			int j = i;
 
 			if (flag) {
-				i = idx;
-				status_code = execute_command(command_tokens.tokens, command_tokens.count);
-				free_token_array(&command_tokens);
-			} else if (!redir_check) {
-				free_token_array(&command_tokens);
-				init_token_array(&command_tokens);
-				while (j < token_array->count &&
-					   strcmp(token_array->tokens[j], "&&") != 0 &&
-					   strcmp(token_array->tokens[j], "||") != 0 &&
-					   strcmp(token_array->tokens[j], "|") != 0 &&
-					   strcmp(token_array->tokens[j], ">") != 0 &&
-					   strcmp(token_array->tokens[j], ">>") != 0) {
-					add_token(&command_tokens, token_array->tokens[j]);
+				i	   = idx;
+				status = execute_command(cmdTokens.tokens, cmdTokens.count);
+				free_token_array(&cmdTokens);
+			} else if (!redirCheck) {
+				free_token_array(&cmdTokens);
+				init_token_array(&cmdTokens);
+				while (j < tArr->count && strcmp(tArr->tokens[j], "&&") != 0 &&
+					   strcmp(tArr->tokens[j], "||") != 0 &&
+					   strcmp(tArr->tokens[j], "|") != 0 &&
+					   strcmp(tArr->tokens[j], ">") != 0 &&
+					   strcmp(tArr->tokens[j], ">>") != 0) {
+					add_token(&cmdTokens, tArr->tokens[j]);
 					j++;
 				}
+
 				i = j - 1; // Adjust i to the last token processed
 
 				// Execute the command based on the last operator
-				if ((last_operator == AND_OPERATOR && status_code != SUCCESS_CODE) ||
-					(last_operator == OR_OPERATOR && status_code == SUCCESS_CODE)) {
-					printf("Skipping command due to short-circuiting\n");
+				if ((lastOp == AND && status != SUCCESS_CODE) ||
+					(lastOp == OR && status == SUCCESS_CODE)) {
+					puts("Skipping command due to short-circuiting");
 				} else {
-					if (last_operator == PIPE_OPERATOR) {
+					if (lastOp == PIPE) {
 						// Handle piping (this is a simplified example; actual
 						// piping is more complex)
-						printf("Piping not fully implemented in this example.\n");
-						status_code = execute_command(command_tokens.tokens,
-													  command_tokens.count);
+						puts("Piping not fully implemented in this example.");
+						status =
+							execute_command(cmdTokens.tokens, cmdTokens.count);
 					} else {
 						// Simple command execution
-						status_code = execute_command(command_tokens.tokens,
-													  command_tokens.count);
+						status =
+							execute_command(cmdTokens.tokens, cmdTokens.count);
 					}
 				}
 
-				free_token_array(&command_tokens);
+				free_token_array(&cmdTokens);
 			}
-			
 		}
 	}
 }
-
 
 // int main() {
 // 	// Test Case 1: Basic AND, OR, and PIPE operations
@@ -293,52 +292,25 @@ void parse_and_execute(TokenArray *token_array) {
 // 	return 0;
 // }
 
+void run_test(const char *input, const char *test_name) {
+	TokenArray tArr;
+	init_token_array(&tArr);
+	tokenize_input(input, &tArr);
+	printf("%s:\n", test_name);
+	parse_and_execute(&tArr);
+	free_token_array(&tArr);
+}
 
 int main() {
-    // Test Case 1
-    const char *input1 = "grep 'done' > output.txt";
-    TokenArray token_array1;
-    init_token_array(&token_array1);
-    tokenize_input(input1, &token_array1);
-    printf("Test Case 1:\n");
-    parse_and_execute(&token_array1);
-    free_token_array(&token_array1);
+	run_test("grep 'done' > output.txt", "Test Case 1: grep with redirection");
+	run_test("echo \"hello\" >> file1.txt > file2.txt",
+			 "Test Case 2: Double redirection");
+	run_test("echo \"hello\" > file1.txt && cd usr/",
+			 "Test Case 3: Redirection and AND");
+	run_test("ls -l | grep 'file' > output.txt",
+			 "Test Case 4: Pipe and redirection");
+	run_test("cat file.txt | sort | uniq > sorted.txt",
+			 "Test Case 5: Multiple pipes with redirection");
 
-    // Test Case 2: echo "hello" >> file1.txt > file2.txt
-    const char *input2 = "echo \"hello\" >> file1.txt > file2.txt";
-    TokenArray token_array2;
-    init_token_array(&token_array2);
-    tokenize_input(input2, &token_array2);
-    printf("Test Case 2:\n");
-    parse_and_execute(&token_array2);
-    free_token_array(&token_array2);
-
-    // Test Case 3: echo "hello" > file1.txt && cd usr/
-    const char *input3 = "echo \"hello\" > file1.txt && cd usr/";
-    TokenArray token_array3;
-    init_token_array(&token_array3);
-    tokenize_input(input3, &token_array3);
-    printf("Test Case 3:\n");
-    parse_and_execute(&token_array3);
-    free_token_array(&token_array3);
-
-    // Test Case 4: ls -l | grep 'file' > output.txt
-    const char *input4 = "ls -l | grep 'file' > output.txt";
-    TokenArray token_array4;
-    init_token_array(&token_array4);
-    tokenize_input(input4, &token_array4);
-    printf("Test Case 4:\n");
-    parse_and_execute(&token_array4);
-    free_token_array(&token_array4);
-
-    // Test Case 5: cat file.txt | sort | uniq > sorted.txt
-    const char *input5 = "cat file.txt | sort | uniq > sorted.txt";
-    TokenArray token_array5;
-    init_token_array(&token_array5);
-    tokenize_input(input5, &token_array5);
-    printf("Test Case 5:\n");
-    parse_and_execute(&token_array5);
-    free_token_array(&token_array5);
-
-    return 0;
+	return 0;
 }
