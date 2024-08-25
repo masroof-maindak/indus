@@ -13,9 +13,6 @@
 #include "../include/utils.h"
 #include "../include/prompt.h"
 
-#define INITIAL_SIZE 10
-#define SCALE_FACTOR 2
-
 extern struct USER_INFO currentUser;
 
 char *builtinsStr[]			  = {"cd",	  "ls",	   "pwd",	"help",	 "exit",
@@ -28,9 +25,7 @@ int num_builtins() { return sizeof(builtinsStr) / sizeof(builtinsStr[0]); }
 
 /* FIXME: Conditional jump or move depends on uninitialised value(s) */
 
-int compare_strings(const void *a, const void *b) {
-    return strcmp(*(const char **)a, *(const char **)b);
-}
+int compare(const void *a, const void *b) { return strcmp(*(char **)a, *(char **)b); }
 
 int indus_ls(char **args) {
 
@@ -39,7 +34,7 @@ int indus_ls(char **args) {
 	DIR *d;
 	struct dirent *entry;
 	struct stat entryStat;
-
+	
 	if (args[1] == NULL) {
 		dir = get_pwd();
 		if (dir == NULL) {
@@ -57,7 +52,7 @@ int indus_ls(char **args) {
 		return 1;
 	}
 
-	int dAlloc = INITIAL_SIZE, fAlloc = INITIAL_SIZE, sAlloc = INITIAL_SIZE;
+	int dAlloc = 8, fAlloc = 8, sAlloc = 8;
     int dCount = 0, fCount = 0, sCount = 0;
 
     char **dirs = malloc(dAlloc * sizeof(char *));
@@ -85,7 +80,7 @@ int indus_ls(char **args) {
 
 		if (S_ISDIR(entryStat.st_mode)) {
 			if (dCount >= dAlloc) {
-                dAlloc *= SCALE_FACTOR;
+                dAlloc *= 2;
                 dirs = realloc(dirs, dAlloc * sizeof(char *));
                 if (!dirs) {
                     perror("realloc()");
@@ -96,7 +91,7 @@ int indus_ls(char **args) {
 			dirs[dCount++] = strdup(entry->d_name);
 		} else if (S_ISLNK(entryStat.st_mode)) {
            if (sCount >= sAlloc) {
-                sAlloc *= SCALE_FACTOR;
+                sAlloc *= 2;
                 symlinks = realloc(symlinks, sAlloc * sizeof(char *));
                 if (!symlinks) {
                     perror("realloc()");
@@ -107,7 +102,7 @@ int indus_ls(char **args) {
             symlinks[sCount++] = strdup(entry->d_name);
 		} else {
 			if (fCount >= fAlloc) {
-                fAlloc *= SCALE_FACTOR;
+                fAlloc *= 2;
                 files = realloc(files, fAlloc * sizeof(char *));
                 if (!files) {
                     perror("realloc()");
@@ -119,35 +114,56 @@ int indus_ls(char **args) {
         }
 	}
 
-	if (dCount > 0) {
-        qsort(dirs, dCount, sizeof(char *), compare_strings);
-    }
-    if (fCount > 0) {
-        qsort(files, fCount, sizeof(char *), compare_strings);
-    }
-	if (sCount > 0) {
-        qsort(symlinks, sCount, sizeof(char *), compare_strings);
-    }
+	qsort(dirs, dCount, sizeof(char *), compare);
+	qsort(files, fCount, sizeof(char *), compare);
+	qsort(symlinks, sCount, sizeof(char *), compare);
 
 	for (int i = 0; i < dCount; i++) {
-		printf("%s%s%s  ", DIR_COLOR, dirs[i], RESET_COLOR);
+		printf("%s%s%s  ", DIR_COLOR, dirs[i], COL_RESET);
 		free(dirs[i]);
 	}
 
 	free(dirs);
 
-	for (int i = 0; i < fCount; i++) {
-		printf("%s%s%s  ", FILE_COLOR, files[i], RESET_COLOR);
-		free(files[i]);
-	}
-
-	free(files);
-
-	for (int i = 0; i < sCount; i++) {
-        printf("%s%s%s  ", ACCENT, symlinks[i], RESET_COLOR);
-        free(symlinks[i]);
+	int totalCount = fCount + sCount;
+    char **merged = malloc(totalCount * sizeof(char *));
+    char **colors = malloc(totalCount * sizeof(char *));
+    if (!merged || !colors) {
+        perror("malloc()");
+        closedir(d);
+        return 1;
     }
-    free(symlinks);
+
+    int fIdx = 0, sIdx = 0, mIdx = 0;
+    while (fIdx < fCount && sIdx < sCount) {
+        if (strcmp(files[fIdx], symlinks[sIdx]) < 0) {
+            merged[mIdx] = files[fIdx];
+            colors[mIdx++] = FILE_COLOR;
+            fIdx++;
+        } else {
+            merged[mIdx] = symlinks[sIdx];
+            colors[mIdx++] = ACCENT;
+            sIdx++;
+        }
+    }
+
+    while (fIdx < fCount) {
+        merged[mIdx] = files[fIdx];
+        colors[mIdx++] = FILE_COLOR;
+        fIdx++;
+    }
+    while (sIdx < sCount) {
+        merged[mIdx] = symlinks[sIdx];
+        colors[mIdx++] = ACCENT;
+        sIdx++;
+    }
+
+	for (int i = 0; i < totalCount; i++) {
+        printf("%s%s%s  ", colors[i], merged[i], COL_RESET);
+        free(merged[i]);
+    }
+    free(merged);
+    free(colors);
 
 	printf("\n");
 
