@@ -46,11 +46,13 @@ void tokenize_input(const char *input, TokenArray *tArr) {
 			} else if (*ptr == '|') {
 				add_token(tArr, "|");
 			} else if (*ptr == '>') {
-				if (*(ptr + 1) != '>')
+				if (*(ptr + 1) != '>'){
 					add_token(tArr, ">");
-				else
+				}
+				else{
 					add_token(tArr, ">>");
 					ptr++;
+				}
 			}
 		} else {
 			buffer[charIdx] = *ptr;
