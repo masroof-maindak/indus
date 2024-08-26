@@ -228,35 +228,42 @@ int indus_trash(char **args) {
 	}
 
 	for (int i = 1; args[i] != NULL; i++) {
-		char trashPath[PATH_MAX];
+		char trashPath[PATH_MAXL];
 
-		char *filename	= expand_tilde(args[i]);
-		char *printName = filename;
+		int ret;
+		char *fileName	= expand_tilde(args[i]);
+		char *printName = fileName;
 
-		if (filename == NULL)
+		if (fileName == NULL)
 			return 1;
 
 		if (args[i][0] == '~')
 			printName = args[i] + 2;
 
-		snprintf(trashPath, PATH_MAX, "%s/%s", currentUser.trashDir, printName);
+		ret = snprintf(trashPath, PATH_MAXL, "%s/%s", currentUser.trashDir,
+					   printName);
 
-		if (rename(filename, trashPath) == -1) {
-			switch (errno) {
-			case EXDEV:
-				/* TODO?: Copy files over manually */
-				fputs("File to trash is on a different FS!", stderr);
-				break;
-			default:
-				perror("indus_trash()");
-				break;
-			}
-
-			free(filename);
+		if (ret < 0) {
+			fprintf(stderr,
+					"sprintf encountered an error while formatting %s: %s",
+					fileName, strerror(errno));
+			free(fileName);
 			return 1;
 		}
 
-		free(filename);
+		if (rename(fileName, trashPath) == -1) {
+			if (errno == EXDEV)
+				/* TODO?: Copy files over manually */
+				/* https://stackoverflow.com/a/17440097 */
+				fputs("File to trash is on a different FS!", stderr);
+			else
+				perror("indus_trash()");
+
+			free(fileName);
+			return 1;
+		}
+
+		free(fileName);
 	}
 
 	return 0;

@@ -13,12 +13,6 @@
 
 extern struct USER_INFO currentUser;
 
-#if defined(PATH_MAX) && PATH_MAX > 1000
-#define PATH_MAXL PATH_MAX
-#else
-#define PATH_MAXL 1024
-#endif
-
 void ensure_trash_dir_exists() {
 	char *trashDirName	 = "/.trash\0";
 	size_t homeSize		 = strlen(currentUser.home);
