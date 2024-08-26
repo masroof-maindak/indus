@@ -17,7 +17,7 @@
     - [/] help
         - [x] Display builtins
         - [ ] Help messages for all other builtins
-        - [ ] Formatting; bold builtin names, coloured heading, etc
+        - [x] Formatting; bold builtin names, coloured heading, etc
     - [x] trash
     - [x] exit
     - [x] pwd

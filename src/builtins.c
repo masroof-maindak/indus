@@ -271,9 +271,10 @@ int indus_trash(char **args) {
 
 int indus_help(char **args) {
 	if (args[1] == NULL) {
-		printf("Available commands:\n");
+		printf(BOLD_COL_MAGENTA "Available commands:\n" COL_RESET COL_GREEN);
 		for (int i = 0; i < num_builtins(); i++)
 			printf("  %s\n", builtinsStr[i]);
+		printf(COL_RESET);
 	} else {
 		puts("Invalid input format!");
 	}
