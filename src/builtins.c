@@ -12,6 +12,7 @@
 #include "../include/builtins.h"
 #include "../include/utils.h"
 #include "../include/prompt.h"
+#include <linux/limits.h>
 
 extern struct USER_INFO currentUser;
 
@@ -210,7 +211,41 @@ int indus_cd(char **args) {
 
 /* TODO */
 int indus_trash(char **args) {
-	return 0;
+	
+	if (args[1] == NULL) {
+        fprintf(stderr, "indus_trash: missing operand\n");
+        return 1;
+    }
+
+    const char *home = getenv("HOME");
+    if (home == NULL) {
+        fprintf(stderr, "indus_trash: cannot determine home directory\n");
+        return 1;
+    }
+
+    char trash_dir[PATH_MAX];
+    snprintf(trash_dir, sizeof(trash_dir), "%s/.trash", home);
+
+    struct stat st = {0};
+    if (stat(trash_dir, &st) == -1) {
+        if (mkdir(trash_dir, 0700) == -1) {
+            perror("mkdir");
+            return 1;
+        }
+    }
+
+	for (int i = 1; args[i] != NULL; i++) {
+        char *filename = args[i];
+        char trash_path[PATH_MAX];
+
+        snprintf(trash_path, sizeof(trash_path), "%s/%s", trash_dir, filename);
+
+        if (rename(filename, trash_path) == -1) {
+            fprintf(stderr, "indus_trash: cannot move '%s' to trash: %s\n", filename, strerror(errno));
+            return 1;
+        }
+    }
+    return 0;
 }
 
 int indus_help(char **args) {
