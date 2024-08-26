@@ -9,15 +9,15 @@
         - [ ] Tokenize string-quoted input for mkdir/trash
     - [ ] fork()/exec() calls to run program
 - [/] Built-ins
-    - [/] ls
-        - [x] Print directories first, then files, in sorted order
-        - [x] Colour directories & symlinks differently
     - [/] mkdir
         - [ ] Implied `-p` flag
     - [/] help
         - [x] Display builtins
         - [ ] Help messages for all other builtins
         - [x] Formatting; bold builtin names, coloured heading, etc
+    - [x] ls
+        - [x] Print directories first, then files, in sorted order
+        - [x] Colour directories & symlinks differently
     - [x] trash
     - [x] exit
     - [x] pwd

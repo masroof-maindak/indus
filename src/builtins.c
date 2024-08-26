@@ -27,7 +27,7 @@ int compare(const void *a, const void *b) {
 	return strcmp(*(char **)a, *(char **)b);
 }
 
-/* TODO: Refactor this eventually */
+/* TODO: Refactor */
 int indus_ls(char **args) {
 
 	bool argGiven = false;
@@ -124,7 +124,7 @@ int indus_ls(char **args) {
 	qsort(symlinks, sCount, sizeof(char *), compare);
 
 	for (int i = 0; i < dCount; i++) {
-		printf("%s%s%s\n", DIR_COLOR, dirs[i], COL_RESET);
+		printf(BOLD_COL_BLUE "%s\n", dirs[i]);
 		free(dirs[i]);
 	}
 
@@ -167,7 +167,7 @@ int indus_ls(char **args) {
 	}
 
 	for (int i = 0; i < totalCount; i++) {
-		printf("%s%s%s\n", colors[i], merged[i], COL_RESET);
+		printf("%s%s\n" COL_RESET, colors[i], merged[i]);
 		free(merged[i]);
 	}
 
