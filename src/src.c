@@ -3,11 +3,12 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "../include/bool.h"
 #include "../include/builtins.h"
 #include "../include/prompt.h"
 #include "../include/utils.h"
 
-struct USER_INFO currentUser;
+struct USER_INFO currentUser = {-1, NULL, NULL, NULL};
 
 int execute(char **args) {
 	if (args == NULL)
@@ -54,13 +55,17 @@ void loop() {
 
 int cleanup() { return 0; }
 
-void init() {
-	init_user_info(&currentUser);
+bool init() {
 	/* signal(SIGINT, SIG_IGN); */
+	init_user_info(&currentUser);
+	ensure_trash_dir_exists();
+	if (currentUser.trashDir == NULL)
+		return false;
+	return true;
 }
 
 int main(/* int argc, char **argv, char **envp */) {
-	init();
-	loop();
+	if (init())
+		loop();
 	return cleanup();
 }

@@ -1,9 +1,11 @@
 #include <errno.h>
 #include <linux/limits.h>
+#include <linux/stat.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -17,6 +19,29 @@ extern struct USER_INFO currentUser;
 #define PATH_MAXL 1024
 #endif
 
+void ensure_trash_dir_exists() {
+	char *trashDirName	 = "/.trash\0";
+	size_t homeSize		 = strlen(currentUser.home);
+	size_t size			 = homeSize + 7;
+	currentUser.trashDir = malloc(size + 1);
+
+	if (currentUser.trashDir == NULL) {
+		perror("malloc()");
+		return;
+	}
+
+	memcpy(currentUser.trashDir, currentUser.home, homeSize);
+	memcpy(currentUser.trashDir + homeSize, trashDirName, 8);
+
+	struct stat st = {0};
+	if (stat(currentUser.trashDir, &st) == -1) {
+		if (mkdir(currentUser.trashDir, 0700) == -1) {
+			perror("mkdir()");
+			return;
+		}
+	}
+}
+
 char *expand_tilde(char *path) {
 	if (path == NULL || path[0] != '~')
 		return copy_string(path);
@@ -27,7 +52,7 @@ char *expand_tilde(char *path) {
 
 	if (newPath == NULL) {
 		perror("malloc()");
-		return copy_string(path);
+		return NULL;
 	}
 
 	memcpy(newPath, currentUser.home, homeLen);
@@ -75,14 +100,14 @@ char *get_pwd() {
 
 char *copy_string(char *str) {
 	if (str == NULL) {
-		fputs("copy_string receieved null input string\n", stderr);
+		fputs("copy_string receieved NULL!\n", stderr);
 		return NULL;
 	}
 
 	size_t size = strlen(str);
 	char *copy	= malloc(size + 1);
 	if (copy == NULL) {
-		perror("copy_string malloc() error");
+		perror("malloc()");
 		return NULL;
 	}
 

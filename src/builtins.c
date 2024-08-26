@@ -1,6 +1,6 @@
 #include <dirent.h>
 #include <errno.h>
-#include <linux/stat.h>
+#include <linux/limits.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,9 +10,8 @@
 
 #include "../include/bool.h"
 #include "../include/builtins.h"
-#include "../include/utils.h"
 #include "../include/prompt.h"
-#include <linux/limits.h>
+#include "../include/utils.h"
 
 extern struct USER_INFO currentUser;
 
@@ -24,18 +23,19 @@ int (*builtinsFnc[])(char **) = {indus_cd,	  indus_ls,	   indus_pwd,
 
 int num_builtins() { return sizeof(builtinsStr) / sizeof(builtinsStr[0]); }
 
-/* FIXME: Conditional jump or move depends on uninitialised value(s) */
+int compare(const void *a, const void *b) {
+	return strcmp(*(char **)a, *(char **)b);
+}
 
-int compare(const void *a, const void *b) { return strcmp(*(char **)a, *(char **)b); }
-
+/* TODO: Refactor this eventually */
 int indus_ls(char **args) {
 
-	bool argGiven;
+	bool argGiven = false;
 	char *dir;
 	DIR *d;
 	struct dirent *entry;
 	struct stat entryStat;
-	
+
 	if (args[1] == NULL) {
 		dir = get_pwd();
 		if (dir == NULL) {
@@ -54,22 +54,23 @@ int indus_ls(char **args) {
 	}
 
 	int dAlloc = 8, fAlloc = 8, sAlloc = 8;
-    int dCount = 0, fCount = 0, sCount = 0;
+	int dCount = 0, fCount = 0, sCount = 0;
 
-    char **dirs = malloc(dAlloc * sizeof(char *));
-    char **files = malloc(fAlloc * sizeof(char *));
-    char **symlinks = malloc(sAlloc * sizeof(char *));
+	char **dirs		= malloc(dAlloc * sizeof(char *));
+	char **files	= malloc(fAlloc * sizeof(char *));
+	char **symlinks = malloc(sAlloc * sizeof(char *));
 
 	if (!dirs || !files || !symlinks) {
-        perror("malloc()");
-        closedir(d);
-        return 1;
-    }
+		perror("malloc()");
+		closedir(d);
+		return 1;
+	}
 
 	while ((entry = readdir(d)) != NULL) {
-		if (entry->d_name[0] == '.' && (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)) {
-            continue; 
-        }
+		if (entry->d_name[0] == '.' && (strcmp(entry->d_name, ".") == 0 ||
+										strcmp(entry->d_name, "..") == 0)) {
+			continue;
+		}
 
 		char path[1024];
 		snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
@@ -81,38 +82,41 @@ int indus_ls(char **args) {
 
 		if (S_ISDIR(entryStat.st_mode)) {
 			if (dCount >= dAlloc) {
-                dAlloc *= 2;
-                dirs = realloc(dirs, dAlloc * sizeof(char *));
-                if (!dirs) {
-                    perror("realloc()");
-                    closedir(d);
-                    return 1;
-                }
+				dAlloc *= 2;
+				dirs = realloc(dirs, dAlloc * sizeof(char *));
+				if (!dirs) {
+					perror("realloc()");
+					closedir(d);
+					return 1;
+				}
 			}
-			dirs[dCount++] = strdup(entry->d_name);
+
+			dirs[dCount++] = copy_string(entry->d_name);
 		} else if (S_ISLNK(entryStat.st_mode)) {
-           if (sCount >= sAlloc) {
-                sAlloc *= 2;
-                symlinks = realloc(symlinks, sAlloc * sizeof(char *));
-                if (!symlinks) {
-                    perror("realloc()");
-                    closedir(d);
-                    return 1;
-                }
-            }
-            symlinks[sCount++] = strdup(entry->d_name);
+			if (sCount >= sAlloc) {
+				sAlloc *= 2;
+				symlinks = realloc(symlinks, sAlloc * sizeof(char *));
+				if (!symlinks) {
+					perror("realloc()");
+					closedir(d);
+					return 1;
+				}
+			}
+
+			symlinks[sCount++] = copy_string(entry->d_name);
 		} else {
 			if (fCount >= fAlloc) {
-                fAlloc *= 2;
-                files = realloc(files, fAlloc * sizeof(char *));
-                if (!files) {
-                    perror("realloc()");
-                    closedir(d);
-                    return 1;
-                }
-            }
-            files[fCount++] = strdup(entry->d_name);
-        }
+				fAlloc *= 2;
+				files = realloc(files, fAlloc * sizeof(char *));
+				if (!files) {
+					perror("realloc()");
+					closedir(d);
+					return 1;
+				}
+			}
+
+			files[fCount++] = copy_string(entry->d_name);
+		}
 	}
 
 	qsort(dirs, dCount, sizeof(char *), compare);
@@ -120,53 +124,57 @@ int indus_ls(char **args) {
 	qsort(symlinks, sCount, sizeof(char *), compare);
 
 	for (int i = 0; i < dCount; i++) {
-		printf("%s%s%s  ", DIR_COLOR, dirs[i], COL_RESET);
+		printf("%s%s%s\n", DIR_COLOR, dirs[i], COL_RESET);
 		free(dirs[i]);
 	}
 
 	free(dirs);
 
 	int totalCount = fCount + sCount;
-    char **merged = malloc(totalCount * sizeof(char *));
-    char **colors = malloc(totalCount * sizeof(char *));
-    if (!merged || !colors) {
-        perror("malloc()");
-        closedir(d);
-        return 1;
-    }
+	char **merged  = malloc(totalCount * sizeof(char *));
+	char **colors  = malloc(totalCount * sizeof(char *));
 
-    int fIdx = 0, sIdx = 0, mIdx = 0;
-    while (fIdx < fCount && sIdx < sCount) {
-        if (strcmp(files[fIdx], symlinks[sIdx]) < 0) {
-            merged[mIdx] = files[fIdx];
-            colors[mIdx++] = FILE_COLOR;
-            fIdx++;
-        } else {
-            merged[mIdx] = symlinks[sIdx];
-            colors[mIdx++] = ACCENT;
-            sIdx++;
-        }
-    }
+	if (!merged || !colors) {
+		perror("malloc()");
+		closedir(d);
+		return 1;
+	}
 
-    while (fIdx < fCount) {
-        merged[mIdx] = files[fIdx];
-        colors[mIdx++] = FILE_COLOR;
-        fIdx++;
-    }
-    while (sIdx < sCount) {
-        merged[mIdx] = symlinks[sIdx];
-        colors[mIdx++] = ACCENT;
-        sIdx++;
-    }
+	int fIdx = 0, sIdx = 0, mIdx = 0;
+
+	while (fIdx < fCount && sIdx < sCount) {
+		if (strcmp(files[fIdx], symlinks[sIdx]) < 0) {
+			merged[mIdx]   = files[fIdx];
+			colors[mIdx++] = FILE_COLOR;
+			fIdx++;
+		} else {
+			merged[mIdx]   = symlinks[sIdx];
+			colors[mIdx++] = ACCENT;
+			sIdx++;
+		}
+	}
+
+	while (fIdx < fCount) {
+		merged[mIdx]   = files[fIdx];
+		colors[mIdx++] = FILE_COLOR;
+		fIdx++;
+	}
+
+	while (sIdx < sCount) {
+		merged[mIdx]   = symlinks[sIdx];
+		colors[mIdx++] = ACCENT;
+		sIdx++;
+	}
 
 	for (int i = 0; i < totalCount; i++) {
-        printf("%s%s%s  ", colors[i], merged[i], COL_RESET);
-        free(merged[i]);
-    }
-    free(merged);
-    free(colors);
+		printf("%s%s%s\n", colors[i], merged[i], COL_RESET);
+		free(merged[i]);
+	}
 
-	printf("\n");
+	free(merged);
+	free(colors);
+	free(files);
+	free(symlinks);
 
 	if (!argGiven)
 		free(dir);
@@ -186,6 +194,9 @@ int indus_cd(char **args) {
 		dir = copy_string(currentUser.home);
 	else
 		dir = expand_tilde(args[1]);
+
+	if (dir == NULL)
+		return 1;
 
 	if (chdir(dir) != 0) {
 		switch (errno) {
@@ -209,43 +220,46 @@ int indus_cd(char **args) {
 	return 0;
 }
 
-/* TODO */
 int indus_trash(char **args) {
-	
+
 	if (args[1] == NULL) {
-        fprintf(stderr, "indus_trash: missing operand\n");
-        return 1;
-    }
-
-    const char *home = getenv("HOME");
-    if (home == NULL) {
-        fprintf(stderr, "indus_trash: cannot determine home directory\n");
-        return 1;
-    }
-
-    char trash_dir[PATH_MAX];
-    snprintf(trash_dir, sizeof(trash_dir), "%s/.trash", home);
-
-    struct stat st = {0};
-    if (stat(trash_dir, &st) == -1) {
-        if (mkdir(trash_dir, 0700) == -1) {
-            perror("mkdir");
-            return 1;
-        }
-    }
+		fputs("Missing operand\n", stderr);
+		return 1;
+	}
 
 	for (int i = 1; args[i] != NULL; i++) {
-        char *filename = args[i];
-        char trash_path[PATH_MAX];
+		char trashPath[PATH_MAX];
 
-        snprintf(trash_path, sizeof(trash_path), "%s/%s", trash_dir, filename);
+		char *filename	= expand_tilde(args[i]);
+		char *printName = filename;
 
-        if (rename(filename, trash_path) == -1) {
-            fprintf(stderr, "indus_trash: cannot move '%s' to trash: %s\n", filename, strerror(errno));
-            return 1;
-        }
-    }
-    return 0;
+		if (filename == NULL)
+			return 1;
+
+		if (args[i][0] == '~')
+			printName = args[i] + 2;
+
+		snprintf(trashPath, PATH_MAX, "%s/%s", currentUser.trashDir, printName);
+
+		if (rename(filename, trashPath) == -1) {
+			switch (errno) {
+			case EXDEV:
+				/* TODO?: Copy files over manually */
+				fputs("File to trash is on a different FS!", stderr);
+				break;
+			default:
+				perror("indus_trash()");
+				break;
+			}
+
+			free(filename);
+			return 1;
+		}
+
+		free(filename);
+	}
+
+	return 0;
 }
 
 int indus_help(char **args) {
@@ -254,6 +268,7 @@ int indus_help(char **args) {
 		for (int i = 0; i < num_builtins(); i++)
 			printf("  %s\n", builtinsStr[i]);
 	} else {
+		puts("Invalid input format!");
 	}
 
 	return 0;
@@ -276,6 +291,9 @@ int indus_mkdir(char **args) {
 	}
 
 	char *dir = expand_tilde(args[1]);
+
+	if (dir == NULL)
+		return 1;
 
 	if (mkdir(dir, 0755) != 0) {
 		if (errno == EACCES)
