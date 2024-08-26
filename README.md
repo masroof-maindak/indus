@@ -5,21 +5,21 @@
 - [x] getcwd()
 - [/] Execution loop
     - [x] Input
-    - [x] Parse arguments
+    - [/] Parse arguments
+        - [ ] Tokenize string-quoted input for mkdir/trash
     - [ ] fork()/exec() calls to run program
 - [/] Built-ins
     - [/] ls
         - [x] Print directories first, then files, in sorted order
-        - [/] Colour directories & symlinks differently
-        - [ ] `-a` flag; should work in any order
+        - [x] Colour directories & symlinks differently
     - [/] mkdir
         - [ ] Implied `-p` flag
     - [/] help
         - [x] Display builtins
         - [ ] Help messages for all other builtins
-        - [ ] Better formatting; bold builtin names, coloured heading, etc
-    - [ ] trash
-    - [/] exit
+        - [ ] Formatting; bold builtin names, coloured heading, etc
+    - [x] trash
+    - [x] exit
     - [x] pwd
     - [x] clear
     - [x] whoami
