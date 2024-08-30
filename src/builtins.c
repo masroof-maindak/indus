@@ -128,6 +128,7 @@ int indus_ls(char **args) {
 		free(dirs[i]);
 	}
 
+	printf(COL_RESET);
 	free(dirs);
 
 	int totalCount = fCount + sCount;
