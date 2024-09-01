@@ -32,7 +32,7 @@ void loop() {
 
 	printf("Greetings, %s. Welcome to Indus.\n", currentUser.name);
 	printf("Type " ACCENT "help" COL_RESET " to get started.\n");
-	puts("Press Ctrl+c to exit.\n");
+	printf("Press Ctrl+c to exit.\n");
 
 	while (1) {
 		char *prompt = NULL;
@@ -47,7 +47,8 @@ void loop() {
 		status = execute(args);
 
 		free(pwd);
-		free(prompt);
+		if (prompt != pwd)
+			free(prompt);
 		free(input);
 		free(args);
 	}

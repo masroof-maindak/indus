@@ -53,17 +53,20 @@ char *shorten_path_in_pwd(char *pwd) {
 	if (!SHORTEN_PWD || strlen(pwd) == 1)
 		return pwd;
 
-	char *promptBkp = copy_string(pwd);
-	char *copySave	= promptBkp;
 	int counter		= 0;
+	char *word		= NULL;
+	char *prev		= NULL;
+	char *promptBkp = copy_string(pwd);
+
+	if (promptBkp == NULL)
+		return pwd;
+
+	char *save = promptBkp;
 
 	if (promptBkp[0] == '/') {
 		promptBkp++;
 		counter++;
 	}
-
-	char *word = NULL;
-	char *prev = NULL;
 
 	if ((word = strtok(promptBkp, "/")) != NULL) {
 		while (word) {
@@ -77,7 +80,7 @@ char *shorten_path_in_pwd(char *pwd) {
 		}
 	}
 
-	free(copySave);
+	free(save);
 	return pwd;
 }
 
