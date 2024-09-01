@@ -1,13 +1,4 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -pedantic
-RELEASE_FLAGS = -march=native -O3
-DEBUG_FLAGS = -g -O0
-LDFLAGS = -lreadline
-SRCS = $(wildcard src/*.c)
-OBJS = $(SRCS:.c=.o)
-TARGET = indus
-PREFIX = /usr/local
-BINDIR = $(PREFIX)/bin
+include config.mk
 
 all: CFLAGS += $(RELEASE_FLAGS)
 all: $(TARGET)
@@ -18,7 +9,8 @@ debug: clean $(TARGET)
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-src/%.o: src/%.c
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+	@mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
