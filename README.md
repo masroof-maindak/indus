@@ -1,30 +1,11 @@
 ### TODO
 
-- [x] Fetching cwd/username
-- [x] prompt generation functions
-- [x] getcwd()
-- [/] Execution loop
-    - [x] Input
-    - [/] Parse arguments
-        - [ ] Tokenize string-quoted input for mkdir/trash
-    - [ ] fork()/exec() calls to run program
+- [/] Parse arguments
+    - [ ] Tokenize string-quoted input for mkdir/trash, etc.
 - [/] Built-ins
     - [/] mkdir
         - [ ] Implied `-p` flag
-    - [/] help
-        - [x] Display builtins
-        - [ ] Help messages for all other builtins
-        - [x] Formatting; bold builtin names, coloured heading, etc
-    - [x] ls
-        - [x] Print directories first, then files, in sorted order
-        - [x] Colour directories & symlinks differently
-    - [x] trash
-    - [x] exit
-    - [x] pwd
-    - [x] clear
-    - [x] whoami
-    - [x] cd
-    - [x] Function Pointer Array
+    - [ ] ls - refactor
 - [ ] Pipes - `|`
 - [ ] Conditionals - `&&`, `||`
 - [ ] File redirection (output) - `>>`, `>`
