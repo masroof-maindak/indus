@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "../include/bool.h"
@@ -8,22 +9,49 @@
 #include "../include/prompt.h"
 #include "../include/utils.h"
 
-struct USER_INFO currentUser = {-1, NULL, NULL, NULL};
+extern char **environ;
+
+struct USER_INFO currentUser = {0, NULL, NULL, NULL};
+
+int run(char **args) {
+	int wstatus;
+	pid_t pid = fork();
+
+	switch (pid) {
+	case -1:
+		perror("fork()");
+		return -1;
+	case 0: /* CHILD */
+		execvp(args[0], args);
+		// TODO
+		perror("exec()");
+		return -2;
+	default: /* PARENT */
+		if (waitpid(pid, &wstatus, 0) != pid) {
+			perror("waitpid()");
+			return -3;
+		}
+
+		if (WIFEXITED(wstatus))
+			return 0;
+	}
+
+	return 0;
+}
 
 int execute(char **args) {
 	if (args == NULL)
 		return 0;
+		
+	/* TODO: proper parsing */
 
 	for (int i = 0; i < num_builtins(); i++)
 		if (!strcmp(args[0], builtinsStr[i]))
 			return builtinsFnc[i](args);
 
-	// TODO: fork() & exec()
 
-	return 0;
+	return run(args);
 }
-
-int run() { return 0; }
 
 void loop() {
 	char *input = NULL;
@@ -34,7 +62,7 @@ void loop() {
 	printf("Type " ACCENT "help" COL_RESET " to get started.\n");
 	printf("Press Ctrl+c to exit.\n");
 
-	while (1) {
+	while (!status) {
 		char *prompt = NULL;
 		char *pwd	 = get_pwd();
 
