@@ -1,6 +1,5 @@
 #include <errno.h>
 #include <linux/limits.h>
-#include <linux/stat.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,9 +90,9 @@ char *get_pwd() {
 	return real;
 }
 
-char *copy_string(char *str) {
+char *copy_string(const char *str) {
 	if (str == NULL) {
-		fputs("copy_string receieved NULL!\n", stderr);
+		fprintf(stderr, "copy_string receieved NULL!\n");
 		return NULL;
 	}
 

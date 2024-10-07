@@ -17,9 +17,9 @@ struct USER_INFO {
 #endif
 
 char *get_pwd();
-char *copy_string(char *str);
 char *expand_tilde(char *dir);
 char **parse_input(char *input);
+char *copy_string(const char *str);
 
 void ensure_trash_dir_exists();
 void init_user_info(struct USER_INFO *);

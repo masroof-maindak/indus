@@ -29,8 +29,8 @@ char *shorten_home_in_pwd(char *pwd) {
 
 	if (!strncmp(currentUser.home, pwd, sizeOfHome)) {
 
-		size_t sizeRemaining = sizeOfPwd - sizeOfHome + 1; // ~
-		char *ret			 = malloc(sizeRemaining + 1);
+		size_t sizeLeft = sizeOfPwd - sizeOfHome + 1; /* '~' */
+		char *ret		= malloc(sizeLeft + 1);
 
 		if (ret == NULL) {
 			perror("malloc()");
@@ -39,8 +39,8 @@ char *shorten_home_in_pwd(char *pwd) {
 
 		ret[0] = '~';
 
-		// TODO: convert to memcpy
-		if (sizeRemaining > 0)
+		/* TODO: convert to memcpy */
+		if (sizeLeft > 0)
 			strcpy(ret + 1, pwd + sizeOfHome);
 
 		return ret;

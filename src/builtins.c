@@ -202,13 +202,13 @@ int indus_cd(char **args) {
 	if (chdir(dir) != 0) {
 		switch (errno) {
 		case ENOENT:
-			fputs("No such directory\n", stderr);
+			fprintf(stderr, "No such directory\n");
 			break;
 		case ENOTDIR:
-			fputs("Not a directory\n", stderr);
+			fprintf(stderr, "Not a directory\n");
 			break;
 		case EACCES:
-			fputs("Permission denied\n", stderr);
+			fprintf(stderr, "Permission denied\n");
 			break;
 		default:
 			perror("chdir()");
@@ -222,9 +222,8 @@ int indus_cd(char **args) {
 }
 
 int indus_trash(char **args) {
-
 	if (args[1] == NULL) {
-		fputs("Missing operand\n", stderr);
+		fprintf(stderr, "Missing operand\n");
 		return 1;
 	}
 
@@ -256,7 +255,7 @@ int indus_trash(char **args) {
 			if (errno == EXDEV)
 				/* TODO?: Copy files over manually */
 				/* https://stackoverflow.com/a/17440097 */
-				fputs("File to trash is on a different FS!", stderr);
+				fprintf(stderr, "File to trash is on a different FS!\n");
 			else
 				perror("indus_trash()");
 
@@ -283,7 +282,7 @@ int indus_help(char **args) {
 	return 0;
 }
 
-// CHECK: exit some other way...?
+/* CHECK: exit some other way...? */
 int indus_exit(char **args) {
 	int status = 0;
 
@@ -295,7 +294,7 @@ int indus_exit(char **args) {
 
 int indus_mkdir(char **args) {
 	if (args[1] == NULL) {
-		fputs("See `help mkdir` for usage information\n", stderr);
+		fprintf(stderr, "See `help mkdir` for usage information\n");
 		return 1;
 	}
 
@@ -306,7 +305,7 @@ int indus_mkdir(char **args) {
 
 	if (mkdir(dir, 0755) != 0) {
 		if (errno == EACCES)
-			fputs("Permission denied\n", stderr);
+			fprintf(stderr, "Permission denied\n");
 		else
 			perror("mkdir()");
 		return 1;
