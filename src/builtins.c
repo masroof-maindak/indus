@@ -67,8 +67,8 @@ int indus_ls(char **args) {
 	}
 
 	while ((entry = readdir(d)) != NULL) {
-		if (entry->d_name[0] == '.' && (strcmp(entry->d_name, ".") == 0 ||
-										strcmp(entry->d_name, "..") == 0)) {
+		if (entry->d_name[0] == '.' &&
+			(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))) {
 			continue;
 		}
 
