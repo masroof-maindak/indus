@@ -1,6 +1,7 @@
 ### TODO
 
-- [/] Parse arguments
+- [ ] ALIASES
+- [/] Parse arguments - yacc/bison?
     - [ ] Tokenize string-quoted input for mkdir/trash, etc.
 - [/] Built-ins
     - [/] mkdir
@@ -11,4 +12,3 @@
 - [ ] File redirection (output) - `>>`, `>`
 - [ ] Asynchronous execution - `&`
 - [ ] autocompletion -> Edit Distance algo (Levenshtein/Jaro Wrinkler)
-- [-] Abbreviations like Fish
