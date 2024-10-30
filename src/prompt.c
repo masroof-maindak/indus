@@ -9,7 +9,7 @@
 #include "../include/prompt.h"
 #include "../include/utils.h"
 
-extern struct USER_INFO currentUser;
+extern struct USER_INFO currUser;
 
 char *get_line(char *prompt) {
 	char display[strlen(prompt) + 3];
@@ -21,13 +21,13 @@ char *shorten_home_in_pwd(char *pwd) {
 	if (!SHORTEN_HOME)
 		return pwd;
 
-	size_t sizeOfHome = strlen(currentUser.home);
+	size_t sizeOfHome = strlen(currUser.home);
 	size_t sizeOfPwd  = strlen(pwd);
 
 	if (sizeOfPwd < sizeOfHome)
 		return pwd;
 
-	if (!strncmp(currentUser.home, pwd, sizeOfHome)) {
+	if (!strncmp(currUser.home, pwd, sizeOfHome)) {
 
 		size_t sizeLeft = sizeOfPwd - sizeOfHome + 1; /* '~' */
 		char *ret		= malloc(sizeLeft + 1);

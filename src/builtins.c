@@ -13,7 +13,7 @@
 #include "../include/prompt.h"
 #include "../include/utils.h"
 
-extern struct USER_INFO currentUser;
+extern struct USER_INFO currUser;
 
 char *builtinsStr[]			  = {"cd",	  "ls",	   "pwd",	"help",	 "exit",
 								 "mkdir", "clear", "trash", "whoami"};
@@ -36,7 +36,7 @@ int indus_cd(char **args) {
 	char *dir;
 
 	if (args[1] == NULL)
-		dir = copy_string(currentUser.home);
+		dir = copy_string(currUser.home);
 	else
 		dir = expand_tilde(args[1]);
 
@@ -84,7 +84,7 @@ int indus_trash(char **args) {
 		if (args[i][0] == '~')
 			printName = args[i] + 2;
 
-		ret = snprintf(trashPath, PATH_MAXL, "%s/%s", currentUser.trashDir,
+		ret = snprintf(trashPath, PATH_MAXL, "%s/%s", currUser.trashDir,
 					   printName);
 
 		if (ret < 0) {
@@ -165,7 +165,7 @@ int indus_clear(char **args __attribute__((unused))) {
 }
 
 int indus_whoami(char **args __attribute__((unused))) {
-	puts(currentUser.name);
+	puts(currUser.name);
 	return 0;
 }
 

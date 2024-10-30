@@ -11,7 +11,7 @@
 #include "../include/prompt.h"
 #include "../include/utils.h"
 
-struct USER_INFO currentUser = {0, NULL, NULL, NULL};
+struct USER_INFO currUser = {0, NULL, NULL, NULL};
 
 int run(char **args);
 int cleanup() { return 0; }
@@ -76,7 +76,7 @@ void loop() {
 	char **args = NULL;
 	int status	= 0;
 
-	printf("Greetings, %s. Welcome to Indus.\n", currentUser.name);
+	printf("Greetings, %s. Welcome to Indus.\n", currUser.name);
 	printf("Type " ACCENT "help" COL_RESET " to get started.\n");
 	printf("Press Ctrl+c to exit.\n\n");
 
@@ -110,9 +110,9 @@ void loop() {
 
 bool init() {
 	signal(SIGINT, SIG_IGN);
-	init_user_info(&currentUser);
+	init_user_info(&currUser);
 	ensure_trash_dir_exists();
-	if (currentUser.trashDir == NULL)
+	if (currUser.trashDir == NULL)
 		return false;
 	return true;
 }
