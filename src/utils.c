@@ -9,25 +9,25 @@
 
 #include "../include/utils.h"
 
-extern struct USER_INFO currentUser;
+extern struct USER_INFO currUser;
 
 void ensure_trash_dir_exists() {
-	char *trashDirName	 = "/.trash\0";
-	size_t homeSize		 = strlen(currentUser.home);
-	size_t size			 = homeSize + 7;
-	currentUser.trashDir = malloc(size + 1);
+	char *trashDirName = "/.trash\0";
+	size_t homeSize	   = strlen(currUser.home);
+	size_t size		   = homeSize + 7;
+	currUser.trashDir  = malloc(size + 1);
 
-	if (currentUser.trashDir == NULL) {
+	if (currUser.trashDir == NULL) {
 		perror("malloc()");
 		return;
 	}
 
-	memcpy(currentUser.trashDir, currentUser.home, homeSize);
-	memcpy(currentUser.trashDir + homeSize, trashDirName, 8);
+	memcpy(currUser.trashDir, currUser.home, homeSize);
+	memcpy(currUser.trashDir + homeSize, trashDirName, 8);
 
 	struct stat st = {0};
-	if (stat(currentUser.trashDir, &st) == -1) {
-		if (mkdir(currentUser.trashDir, 0700) == -1) {
+	if (stat(currUser.trashDir, &st) == -1) {
+		if (mkdir(currUser.trashDir, 0700) == -1) {
 			perror("mkdir()");
 			return;
 		}
@@ -38,7 +38,7 @@ char *expand_tilde(char *path) {
 	if (path == NULL || path[0] != '~')
 		return copy_string(path);
 
-	size_t homeLen = strlen(currentUser.home);
+	size_t homeLen = strlen(currUser.home);
 	size_t pathLen = strlen(path);
 	char *newPath  = malloc(sizeof(char) * (homeLen + pathLen));
 
@@ -47,18 +47,17 @@ char *expand_tilde(char *path) {
 		return NULL;
 	}
 
-	memcpy(newPath, currentUser.home, homeLen);
+	memcpy(newPath, currUser.home, homeLen);
 	memcpy(newPath + homeLen, path + 1, pathLen - 1);
 	newPath[homeLen + pathLen - 1] = '\0';
 
 	return newPath;
 }
 
+/* CHECK */
 char *get_pwd() {
 	size_t size = PATH_MAXL;
-	char *buf	= NULL;
-	char *ptr	= NULL;
-	char *real	= NULL;
+	char *buf = NULL, *ptr = NULL, *real = NULL;
 
 	for (; ptr == NULL; size *= 2) {
 		if ((buf = realloc(buf, size)) == NULL) {
@@ -127,15 +126,15 @@ char **parse_input(char *input) {
 	if (input == NULL || input[0] == '\0')
 		return NULL;
 
-	char delim[] = " \t\r\n\a";
-	char *save	 = input;
-	int numArgs	 = 8;
-	int counter	 = 0;
-	char *arg	 = NULL;
-	char **args	 = malloc(numArgs * sizeof(char *));
+	const char delim[] = " \t\r\n\a";
+	int numArgs		   = 8;
+	int counter		   = 0;
+
+	char *arg = NULL, *tmp = NULL, *save = input;
+	char **args = malloc(numArgs * sizeof(char *));
 
 	if (args == NULL) {
-		perror("malloc()");
+		perror("malloc() in parse_input()");
 		return NULL;
 	}
 
@@ -145,9 +144,10 @@ char **parse_input(char *input) {
 
 			if (counter > numArgs) {
 				numArgs *= 2;
-				args = realloc(args, numArgs);
-				if (args == NULL) {
+				tmp = realloc(args, numArgs);
+				if (tmp == NULL) {
 					perror("realloc()");
+					free(args);
 					return NULL;
 				}
 			}

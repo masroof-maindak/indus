@@ -80,7 +80,7 @@ void loop() {
 	printf("Type " ACCENT "help" COL_RESET " to get started.\n");
 	printf("Press Ctrl+c to exit.\n\n");
 
-	while (!status) {
+	while (status == 0) {
 		char *prompt = NULL;
 		char *pwd	 = get_pwd();
 
@@ -90,6 +90,14 @@ void loop() {
 		prompt = generate_prompt(pwd);
 		input  = get_line(prompt);
 		args   = parse_input(input);
+
+		if (args == NULL) {
+			free(pwd);
+			if (prompt != pwd)
+				free(prompt);
+			free(input);
+		}
+
 		status = execute(args);
 
 		free(pwd);
