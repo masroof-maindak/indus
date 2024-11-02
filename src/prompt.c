@@ -1,8 +1,6 @@
-#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <readline/readline.h>
 
@@ -12,8 +10,9 @@
 extern struct USER_INFO currUser;
 
 char *get_line(char *prompt) {
-	char display[strlen(prompt) + 3];
-	sprintf(display, "%s " ACCENT PROMPT_CHAR COL_RESET " ", prompt);
+	size_t size = strlen(prompt) + 3;
+	char display[size];
+	snprintf(display, size, "%s " ACCENT PROMPT_CHAR RESET " ", prompt);
 	return readline(display);
 }
 

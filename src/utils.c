@@ -1,5 +1,3 @@
-#include <errno.h>
-#include <linux/limits.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,8 +32,12 @@ void ensure_trash_dir_exists() {
 	}
 }
 
+/**
+ * @detail Expands the tilde in the path to the home directory of the current
+ * user. Must be freed by the caller.
+ */
 char *expand_tilde(char *path) {
-	if (path == NULL || path[0] != '~')
+	if (path != NULL && path[0] != '~')
 		return copy_string(path);
 
 	size_t homeLen = strlen(currUser.home);
@@ -54,38 +56,37 @@ char *expand_tilde(char *path) {
 	return newPath;
 }
 
-/* CHECK */
 char *get_pwd() {
-	size_t size = PATH_MAXL;
-	char *buf = NULL, *ptr = NULL, *real = NULL;
+	char *buf, *tmp, *real;
 
-	for (; ptr == NULL; size *= 2) {
-		if ((buf = realloc(buf, size)) == NULL) {
-			perror("realloc()");
-			return NULL;
-		}
-
-		ptr = getcwd(buf, size);
-		if (ptr == NULL && errno != ERANGE) {
-			perror("getcwd()");
-			return NULL;
-		}
+	buf = malloc(PATH_MAX);
+	if (buf == NULL) {
+		perror("malloc() in get_pwd() - buf");
+		return NULL;
 	}
 
-	for (; real == NULL; size *= 2) {
-		if ((ptr = realloc(ptr, size)) == NULL) {
-			perror("realloc()");
-			return NULL;
-		}
+	tmp = getcwd(buf, PATH_MAX);
+	if (tmp == NULL) {
+		perror("getcwd()");
+		free(buf);
+		return NULL;
+	}
+	tmp = buf;
 
-		real = realpath(ptr, real);
-		if (real == NULL && errno != ENAMETOOLONG) {
-			perror("realpath()");
-			return ptr;
-		}
+	real = malloc(PATH_MAX);
+	if (real == NULL) {
+		perror("malloc() in get_pwd() - real");
+		return NULL;
 	}
 
-	free(ptr);
+	/* FIXME */
+	real = realpath(buf, real);
+	if (real == NULL) {
+		perror("realpath()");
+		return buf;
+	}
+
+	free(buf);
 	return real;
 }
 
@@ -98,7 +99,7 @@ char *copy_string(const char *str) {
 	size_t size = strlen(str);
 	char *copy	= malloc(size + 1);
 	if (copy == NULL) {
-		perror("malloc()");
+		perror("malloc() in copy_string()");
 		return NULL;
 	}
 
@@ -122,7 +123,7 @@ void init_user_info(struct USER_INFO *curr_user) {
 	}
 }
 
-char **parse_input(char *input) {
+char **tokenise_input(char *input) {
 	if (input == NULL || input[0] == '\0')
 		return NULL;
 
@@ -146,7 +147,7 @@ char **parse_input(char *input) {
 				numArgs *= 2;
 				tmp = realloc(args, numArgs);
 				if (tmp == NULL) {
-					perror("realloc()");
+					perror("realloc() in parse_input");
 					free(args);
 					return NULL;
 				}

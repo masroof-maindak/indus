@@ -3,29 +3,27 @@
 
 #define SHORTEN_HOME 1
 #define SHORTEN_PWD	 0
-/* #define ADD_GIT_BRANCH		  1 */
-/* #define GIT_BRANCH_BUFFER_LEN 256 */
 
 /* COLOURS */
-#define COL_RESET		 "\x1b[0m"
-#define COL_RED			 "\x1b[31m"
-#define COL_GREEN		 "\x1b[32m"
-#define COL_YELLOW		 "\x1b[33m"
-#define COL_BLUE		 "\x1b[34m"
-#define COL_MAGENTA		 "\x1b[35m"
-#define COL_CYAN		 "\x1b[36m"
-#define COL_WHITE		 "\x1b[37m"
-#define BOLD_COL_RED	 "\x1b[1;31m"
-#define BOLD_COL_GREEN	 "\x1b[1;32m"
-#define BOLD_COL_YELLOW	 "\x1b[1;33m"
-#define BOLD_COL_BLUE	 "\x1b[1;34m"
-#define BOLD_COL_MAGENTA "\x1b[1;35m"
-#define BOLD_COL_CYAN	 "\x1b[1;36m"
-#define BOLD_COL_WHITE	 "\x1b[1;37m"
+#define RESET		 "\x1b[0m"
+#define RED			 "\x1b[31m"
+#define GREEN		 "\x1b[32m"
+#define YELLOW		 "\x1b[33m"
+#define BLUE		 "\x1b[34m"
+#define MAGENTA		 "\x1b[35m"
+#define CYAN		 "\x1b[36m"
+#define WHITE		 "\x1b[37m"
+#define BOLD_RED	 "\x1b[1;31m"
+#define BOLD_GREEN	 "\x1b[1;32m"
+#define BOLD_YELLOW	 "\x1b[1;33m"
+#define BOLD_BLUE	 "\x1b[1;34m"
+#define BOLD_MAGENTA "\x1b[1;35m"
+#define BOLD_CYAN	 "\x1b[1;36m"
+#define BOLD_WHITE	 "\x1b[1;37m"
 
-#define FILE_COLOR	COL_RESET
-#define ERROR_COLOR COL_RED
-#define ACCENT		COL_YELLOW
+#define FILE_COLOR	RESET
+#define ERROR_COLOR RED
+#define ACCENT		YELLOW
 
 #define PROMPT_CHAR "*"
 

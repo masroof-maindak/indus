@@ -1,36 +1,19 @@
-#include <dirent.h>
 #include <errno.h>
-#include <linux/limits.h>
-#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
-#include "../include/bool.h"
 #include "../include/builtins.h"
 #include "../include/prompt.h"
 #include "../include/utils.h"
 
 extern struct USER_INFO currUser;
 
-char *builtinsStr[]			  = {"cd",	  "ls",	   "pwd",	"help",	 "exit",
-								 "mkdir", "clear", "trash", "whoami"};
-int (*builtinsFnc[])(char **) = {indus_cd,	  indus_ls,	   indus_pwd,
-								 indus_help,  indus_exit,  indus_mkdir,
-								 indus_clear, indus_trash, indus_whoami};
+char *builtinsStr[]			  = {"cd", "help", "exit", "trash", "whoami"};
+int (*builtinsFnc[])(char **) = {indus_cd, indus_help, indus_exit, indus_trash,
+								 indus_whoami};
 
 int num_builtins() { return sizeof(builtinsStr) / sizeof(builtinsStr[0]); }
-
-int compare(const void *a, const void *b) {
-	return strcmp(*(char **)a, *(char **)b);
-}
-
-int indus_ls(char **args) {
-	/* FIXME */
-	return 0;
-}
 
 int indus_cd(char **args) {
 	char *dir;
@@ -67,14 +50,14 @@ int indus_cd(char **args) {
 
 int indus_trash(char **args) {
 	if (args[1] == NULL) {
-		fprintf(stderr, "Missing operand\n");
+		fprintf(stderr, "indus_trash(): Missing operand\n");
 		return 1;
 	}
 
 	for (int i = 1; args[i] != NULL; i++) {
-		char trashPath[PATH_MAXL];
 
-		int ret;
+		int n;
+		char trashPath[PATH_MAX];
 		char *fileName	= expand_tilde(args[i]);
 		char *printName = fileName;
 
@@ -84,20 +67,17 @@ int indus_trash(char **args) {
 		if (args[i][0] == '~')
 			printName = args[i] + 2;
 
-		ret = snprintf(trashPath, PATH_MAXL, "%s/%s", currUser.trashDir,
-					   printName);
-
-		if (ret < 0) {
-			fprintf(stderr,
-					"sprintf encountered an error while formatting %s: %s",
-					fileName, strerror(errno));
+		n = snprintf(trashPath, PATH_MAX, "%s/%s", currUser.trashDir,
+					 printName);
+		if (n < 0) {
+			perror("snprintf()");
 			free(fileName);
 			return 1;
 		}
 
 		if (rename(fileName, trashPath) == -1) {
 			if (errno == EXDEV)
-				/* TODO?: Copy files over manually */
+				/* TODO(?): Copy files over manually */
 				/* https://stackoverflow.com/a/17440097 */
 				fprintf(stderr, "File to trash is on a different FS!\n");
 			else
@@ -114,19 +94,19 @@ int indus_trash(char **args) {
 }
 
 int indus_help(char **args) {
-	if (args[1] == NULL) {
-		printf(BOLD_COL_MAGENTA "Available commands:\n" COL_RESET COL_GREEN);
-		for (int i = 0; i < num_builtins(); i++)
-			printf("  %s\n", builtinsStr[i]);
-		printf(COL_RESET);
-	} else {
+	if (args[1] != NULL) {
 		puts("Invalid input format!");
+		return 0;
 	}
+
+	printf(BOLD_MAGENTA "Available commands:\n" RESET GREEN);
+	for (int i = 0; i < num_builtins(); i++)
+		puts(builtinsStr[i]);
+	printf(RESET);
 
 	return 0;
 }
 
-/* CHECK: exit some other way...? */
 int indus_exit(char **args) {
 	int status = 0;
 
@@ -136,48 +116,7 @@ int indus_exit(char **args) {
 	exit(status);
 }
 
-int indus_mkdir(char **args) {
-	if (args[1] == NULL) {
-		fprintf(stderr, "See `help mkdir` for usage information\n");
-		return 1;
-	}
-
-	char *dir = expand_tilde(args[1]);
-
-	if (dir == NULL)
-		return 1;
-
-	if (mkdir(dir, 0755) != 0) {
-		if (errno == EACCES)
-			fprintf(stderr, "Permission denied\n");
-		else
-			perror("mkdir()");
-		return 1;
-	}
-
-	free(dir);
-	return 0;
-}
-
-int indus_clear(char **args __attribute__((unused))) {
-	printf("\033[H\033[J");
-	return 0;
-}
-
 int indus_whoami(char **args __attribute__((unused))) {
 	puts(currUser.name);
-	return 0;
-}
-
-int indus_pwd(char **args __attribute__((unused))) {
-	char *pwd = get_pwd();
-
-	if (pwd == NULL) {
-		perror("get_pwd()");
-		return 1;
-	}
-
-	puts(pwd);
-	free(pwd);
 	return 0;
 }

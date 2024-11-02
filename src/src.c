@@ -18,7 +18,7 @@ int cleanup() { return 0; }
 void loop();
 bool init();
 
-int main(/* int argc, char **argv, char **envp */) {
+int main(void /* int argc, char **argv, char **envp */) {
 	if (init())
 		loop();
 	return cleanup();
@@ -77,8 +77,7 @@ void loop() {
 	int status	= 0;
 
 	printf("Greetings, %s. Welcome to Indus.\n", currUser.name);
-	printf("Type " ACCENT "help" COL_RESET " to get started.\n");
-	printf("Press Ctrl+c to exit.\n\n");
+	printf("Type " ACCENT "help" RESET " to get started.\n\n");
 
 	while (status == 0) {
 		char *prompt = NULL;
@@ -89,22 +88,19 @@ void loop() {
 
 		prompt = generate_prompt(pwd);
 		input  = get_line(prompt);
-		args   = parse_input(input);
+		args   = tokenise_input(input);
 
-		if (args == NULL) {
-			free(pwd);
-			if (prompt != pwd)
-				free(prompt);
-			free(input);
-		}
+		if (args == NULL)
+			goto skipArgFree;
 
 		status = execute(args);
 
+		free(args);
+	skipArgFree:
 		free(pwd);
 		if (prompt != pwd)
 			free(prompt);
 		free(input);
-		free(args);
 	}
 }
 
