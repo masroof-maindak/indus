@@ -17,7 +17,7 @@ struct USER_INFO {
 
 char *get_pwd();
 char *expand_tilde(char *dir);
-char **tokenise_input_input(char *input);
+char **tokenise_input(char *input);
 char *copy_string(const char *str);
 
 void ensure_trash_dir_exists();

@@ -16,7 +16,7 @@ struct USER_INFO currUser = {0, NULL, NULL, NULL};
 int run(char **args);
 int cleanup() { return 0; }
 void loop();
-bool init();
+bool_t init();
 
 int main(void /* int argc, char **argv, char **envp */) {
 	if (init())
@@ -104,7 +104,7 @@ void loop() {
 	}
 }
 
-bool init() {
+bool_t init() {
 	signal(SIGINT, SIG_IGN);
 	init_user_info(&currUser);
 	ensure_trash_dir_exists();
